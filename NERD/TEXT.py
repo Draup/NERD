@@ -22,6 +22,12 @@ import unicodedata
 
 
 def get_nth_token(text, n):
+    """
+    Splits text into tokens and returns the nth token
+    :param text: text string
+    :param n: 0 indexed token to return
+    :return:
+    """
     toks = re.findall('[\w+\(\),:;\[\]]+', text)
     if len(toks) > n:
         return toks[n]
@@ -30,6 +36,11 @@ def get_nth_token(text, n):
 
 
 def cleanup_string(text):
+    """
+    Basic text Sanitization
+    :param text:
+    :return:
+    """
     toret = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
     toret = toret.strip()
     toret = re.sub('[\r\n\t]+', ' ', toret)

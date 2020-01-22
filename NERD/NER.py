@@ -18,6 +18,9 @@ from flask import Flask
 from flask import request
 from jinja2 import Template
 import pandas as pd
+from nltk import download as nltk_download
+nltk_download('punkt')
+nltk_download('averaged_perceptron_tagger')
 
 
 def is_alpha_and_numeric(string):
@@ -189,7 +192,7 @@ class BaseNerTagger:
         Returns a random example to be tagged. Used to bootstrap the model.
         :return:
         """
-        self.current_example_index = random.randint(0, len(self.unlabelled))
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
         self.current_example = self.unlabelled[self.current_example_index]
         return self.current_example['raw']
 
@@ -198,7 +201,7 @@ class BaseNerTagger:
         Returns a random example tagged by the currently tagged model.
         :return:
         """
-        self.current_example_index = random.randint(0, len(self.unlabelled))
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
         self.current_example = self.unlabelled[self.current_example_index]
         raw = self.current_example['raw']
         features = sent2features(raw)
@@ -214,7 +217,7 @@ class BaseNerTagger:
             - mean
         :return:
         """
-        sample = np.random.randint(0, len(self.unlabelled), size=250).tolist()
+        sample = np.random.randint(0, len(self.unlabelled) - 1, size=250).tolist()
         X = []
         for s in sample:
             example = self.unlabelled[s]
@@ -372,7 +375,7 @@ def generate_html_from_example(ex):
                 spans[i].attrs['class'] = tag
                 tagidcounter += 1
 
-    soup = BeautifulSoup()
+    soup = BeautifulSoup(features='html.parser')
     soup.extend(spans)
     return str(soup)
 
