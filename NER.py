@@ -590,7 +590,7 @@ class NerTagger:
 
 if __name__ == '__main__':
     # Unique Tags / Classes
-
+    # tags are given in the below format.
     tags = [
         ("CT", "Course Title"),
         ("CC", "Course Code"),
