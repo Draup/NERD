@@ -459,17 +459,11 @@ def get_pos_tagged_example(text):
 class NerTagger:
     def __init__(self, dataset, unique_tags, data_directory=''):
         """
-        need unique tag, tag tiles
-        EX:
-        tags= [
-            ("CT", "Course Title"),
-            ("CC", "Course Code"),
-            ("PREQ", "Pre-requisites"),
-            ("PROF", "Professor"),
-            ("SE", "Season"),
-            ("CR", "Credits")
-        ]
-        :param unique_tags:
+        Initialize the NER tagger with a list of strings and unique tags list.
+        Args:
+            dataset: list of strings.
+            unique_tags: list of ('TagID', 'Tag Name') tuples.
+            data_directory: default data directory.
         """
         self.unique_tags = unique_tags
         self.ntagger = BaseNerTagger(dataset, data_directory=data_directory)
@@ -479,8 +473,11 @@ class NerTagger:
     def start_server(self, port=None):
         """
         Start the ner tagging server
-        :param port: Port number to bind the server to.
-        :return:
+        Args:
+            port: Port number to bind the server to.
+
+        Returns:
+
         """
         if port:
             self.app.run(port)
@@ -490,50 +487,71 @@ class NerTagger:
     def add_unlabelled_examples(self, examples):
         """
         Append unlabelled examples to dataset
-        :param examples: list of strings
-        :return:
+        Args:
+            examples: list of strings
+
+        Returns:
+
         """
         self.ntagger.add_unlabelled_examples(examples)
 
     def save_labelled_examples(self, filepath):
         """
         Save labelled examples to file
-        :param filepath: destination filename
-        :return:
+        Args:
+            filepath: destination filename
+
+        Returns:
+
         """
+
         self.ntagger.save_data(filepath)
 
     def load_labelled_examples(self, filepath):
         """
         Load labelled examples to the dataset
-        :param filepath: source filename
-        :return:
+        Args:
+            filepath: source filename
+
+        Returns:
+
         """
+
         self.ntagger.load_data(filepath)
 
     def save_model(self, model_filename):
         """
         Save ner model to file
-        :param model_filename: destination filename
-        :return:
+        Args:
+            model_filename: v
+
+        Returns:
+
         """
+
         with open(model_filename, 'wb') as out:
             pickle.dump(self.ntagger.model, out)
 
     def load_model(self, model_filename):
         """
         Load ner model from file
-        :param model_filename: source filename
-        :return:
+        Args:
+            model_filename: source filename
+
+        Returns:
+
         """
+
         with open(model_filename, 'rb') as inp:
             self.ntagger.model = pickle.load(inp)
 
     def update_model(self):
         """
         Updates the model
-        :return:
+        Returns:
+
         """
+
         self.ntagger.update_model()
 
 
