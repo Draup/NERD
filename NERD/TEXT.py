@@ -24,9 +24,12 @@ import unicodedata
 def get_nth_token(text, n):
     """
     Splits text into tokens and returns the nth token
-    :param text: text string
-    :param n: 0 indexed token to return
-    :return:
+    Args:
+        text: text string
+        n: 0 indexed token to return
+
+    Returns:
+
     """
     toks = re.findall('[\w+\(\),:;\[\]]+', text)
     if len(toks) > n:
@@ -38,8 +41,11 @@ def get_nth_token(text, n):
 def cleanup_string(text):
     """
     Basic text Sanitization
-    :param text:
-    :return:
+    Args:
+        text: text to cleanup
+
+    Returns:
+
     """
     toret = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
     toret = toret.strip()
@@ -194,8 +200,11 @@ class BaseTextClassifier:
     def __init__(self, unlabelled, labelled=None, feature_transformer=None, data_directory=''):
         """
         Initialize with a DataFrame(['text']) and/or DataFrame(['text', 'class'])
-        :param unlabelled: DataFrame(['text'])
-        :param labelled: DataFrame(['text', 'class'])
+        Args:
+            unlabelled: DataFrame(['text'])
+            labelled: DataFrame(['text', 'class'])
+            feature_transformer: Sklearn transformer to calculate extra features
+            data_directory: Default data directory
         """
         self.unlabelled = pd.DataFrame(data={'text': unlabelled})
         self.labelled = labelled
@@ -219,7 +228,6 @@ class BaseTextClassifier:
         os.makedirs(self.data_directory, exist_ok=True)
 
     def _refresh_text_feature_data(self):
-
         feature_data = self.feature_transformer.fit_transform(self.all_data['text'])
         self.feature_columns = list(feature_data.columns)
         for col in feature_data.columns:
@@ -228,7 +236,8 @@ class BaseTextClassifier:
     def get_new_random_example(self):
         """
         Returns a random example to be tagged. Used to bootstrap the model.
-        :return:
+        Returns:
+
         """
         unl = self.all_data[self.all_data['class'].isna()].index
         self.current_example_index = np.random.choice(unl)
@@ -238,10 +247,12 @@ class BaseTextClassifier:
     def query_new_example(self, mode='entropy'):
         """
         Returns a new example based on the chosen active learning strategy.
-        :param mode: Active Learning Strategy
-            - max (Default)
-            - mean
-        :return:
+        Args:
+            mode: Active Learning Strategy
+                - max (Default)
+                - mean
+        Returns:
+
         """
         if mode == 'entropy':
             unlab = self.all_data[self.all_data['class'].isna()]
@@ -257,7 +268,8 @@ class BaseTextClassifier:
     def update_model(self):
         """
         Updates the model with the currently labelled dataset
-        :return:
+        Returns:
+
         """
 
         if self.model is None:
@@ -276,16 +288,22 @@ class BaseTextClassifier:
     def save_example(self, data):
         """
         Saves the current example with the user tagged data
-        :param data: User tagged data. [list of tags]
-        :return:
+        Args:
+            data: User tagged data. [list of tags].
+
+        Returns:
+
         """
         self.all_data.loc[self.current_example_index, 'class'] = data
 
     def save_data(self, filepath=None):
         """
         Saves the labelled data to a file
-        :param filepath: file to save the data in a pickle format.
-        :return:
+        Args:
+            filepath: file to save the data in a pickle format.
+
+        Returns:
+
         """
         if filepath is None:
             filepath = os.path.join(self.data_directory, 'text_classification_data.csv')
@@ -293,9 +311,12 @@ class BaseTextClassifier:
 
     def load_data(self, filepath=None):
         """
-        Loads labelled data from file.
-        :param filepath: file containing pickeled labelled dataset
-        :return:
+        Loads labelled data from file.|
+        Args:
+            filepath: file containing pickeled labelled dataset
+
+        Returns:
+
         """
         if filepath is None:
             filepath = os.path.join(self.data_directory, 'text_classification_data.csv')

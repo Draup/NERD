@@ -22,8 +22,12 @@ from nltk import download as nltk_download
 nltk_download('punkt')
 nltk_download('averaged_perceptron_tagger')
 
-
 def is_alpha_and_numeric(string):
+    """
+    Checks whether the string is alpha/numeric or both
+    :param string: text string
+    :return: alpha numeric class [DIGIT/ALPHA_UPPER/ALPHA_LOWER/ALPHA/ALPHA_NUM/EMPTY]
+    """
     toret = ''
     if string.isdigit():
         toret = 'DIGIT'
@@ -174,6 +178,7 @@ class BaseNerTagger:
         Initialize with a list of unlabelled strings and/or list of tagged tuples.
         :param unlabelled: list of strings
         :param labelled: list of {list of tuples [(token, pos_tag, tag), ...]}
+        :param data_directory: Default directory to save all data
         """
         if unlabelled is None:
             self.unlabelled = None
@@ -190,7 +195,7 @@ class BaseNerTagger:
     def get_new_random_example(self):
         """
         Returns a random example to be tagged. Used to bootstrap the model.
-        :return:
+        Returns: Randomly selected text
         """
         self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
         self.current_example = self.unlabelled[self.current_example_index]
@@ -199,7 +204,7 @@ class BaseNerTagger:
     def get_new_random_predicted_example(self):
         """
         Returns a random example tagged by the currently tagged model.
-        :return:
+        Returns: Text String
         """
         self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
         self.current_example = self.unlabelled[self.current_example_index]
@@ -380,17 +385,15 @@ def generate_html_from_example(ex):
     return str(soup)
 
 
-list_of_colors = "#e6194B, #3cb44b, #ffe119, #4363d8, #f58231, #911eb4, #42d4f4, #f032e6, #bfef45, #fabebe, #469990, #e6beff, #9A6324, #fffac8, #800000, #aaffc3, #808000, #ffd8b1, #000075, #a9a9a9"
+list_of_colors = "#e6194B, #3cb44b, #ffe119, #4363d8, #f58231, #911eb4, #42d4f4, #f032e6, #bfef45, #fabebe, #469990, " \
+                 "#e6beff, #9A6324, #fffac8, #800000, #aaffc3, #808000, #ffd8b1, #000075, #a9a9a9 "
 list_of_colors = list_of_colors.split(', ')
 
 
 def render_app_template(unique_tags_data):
     """
-    Tag data in the form
-    [
-        (tag_id, readable_tag_name)
-    ]
-    :param unique_tags_data:
+    Tag data list of tuples (tag_id, readable_tag_name)
+    :param unique_tags_data: list of tag tuples
     :return: html template to render
     """
 
