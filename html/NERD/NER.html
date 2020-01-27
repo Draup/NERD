@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.4" />
+<title>NERD.NER API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>NERD.NER</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+# coding: utf-8
+
+
+import json
+from sklearn_crfsuite import CRF
+import numpy as np
+from scipy.stats import entropy
+from nltk import word_tokenize, pos_tag
+import random
+import pickle
+import os
+from bs4 import BeautifulSoup
+from bs4 import Tag
+from collections import Counter
+
+from flask import Flask
+from flask import request
+from jinja2 import Template
+import pandas as pd
+from nltk import download as nltk_download
+
+nltk_download(&#39;punkt&#39;)
+nltk_download(&#39;averaged_perceptron_tagger&#39;)
+
+
+class BaseNerTagger:
+    &#34;&#34;&#34;
+    A utility class for NER Tagging.
+    &#34;&#34;&#34;
+
+    def __init__(self, unlabelled, labelled=None, data_directory=&#39;&#39;):
+        &#34;&#34;&#34;
+        Initialize with a list of unlabelled strings and/or list of tagged tuples.
+        Args:
+            unlabelled: list of strings
+            labelled: list of {list of tuples [(token, pos_tag, tag), ...]}
+            data_directory: Default directory to save all data
+        &#34;&#34;&#34;
+        if unlabelled is None:
+            self.unlabelled = None
+        else:
+            self.unlabelled = [{&#39;raw&#39;: BaseNerTagger._get_pos_tagged_example(text)} for text in unlabelled]
+        if labelled is None:
+            labelled = []
+        self.labelled = labelled
+        self.model = None
+
+        self.data_directory = os.path.join(data_directory, &#39;NER_Data&#39;)
+        os.makedirs(self.data_directory, exist_ok=True)
+
+
+    @staticmethod
+    def _get_pos_tagged_example(text):
+        tokens = word_tokenize(text)
+        toret = pos_tag(tokens)
+        return toret
+
+    @staticmethod
+    def _is_alpha_and_numeric(string):
+        &#34;&#34;&#34;
+        Checks whether the string is alpha/numeric or both
+        Args:
+            string: text string
+
+        Returns: alpha numeric class [DIGIT/ALPHA_UPPER/ALPHA_LOWER/ALPHA/ALPHA_NUM/EMPTY]
+
+        &#34;&#34;&#34;
+        toret = &#39;&#39;
+        if string.isdigit():
+            toret = &#39;DIGIT&#39;
+        elif string.isalpha():
+            if string.isupper():
+                toret = &#39;ALPHA_UPPER&#39;
+            elif string.islower():
+                toret = &#39;ALPHA_LOWER&#39;
+            else:
+                toret = &#39;ALPHA&#39;
+        elif len(string) &gt; 0:
+            toks = [string[0], string[-1]]
+            alphanum = 0
+            for tok in toks:
+                if tok.isdigit():
+                    alphanum += 1
+                elif tok.isalpha():
+                    alphanum -= 1
+            if alphanum == 0:
+                toret = &#39;ALPHA_NUM&#39;
+        else:
+            toret = &#39;EMPTY&#39;
+
+        return toret
+
+    @staticmethod
+    def _word2features(sent, i):
+        &#34;&#34;&#34;
+        Calculate features for each word in the sentence
+        Args:
+            sent: List of words in the sentence
+            i: i&#39;th word in the sentence
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        word = sent[i][0]
+        postag = sent[i][1]
+
+        features = {
+            &#39;bias&#39;: 1.0,
+            &#39;word.lower()&#39;: word.lower(),
+            &#39;word[-3:]&#39;: word[-3:],
+            &#39;word[-2:]&#39;: word[-2:],
+            &#39;word.isupper()&#39;: word.isupper(),
+            &#39;word.istitle()&#39;: word.istitle(),
+            &#39;word.isdigit()&#39;: word.isdigit(),
+            &#39;word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word),
+            &#39;postag&#39;: postag,
+        }
+
+        if i &gt; 0:
+            word = sent[i - 1][0]
+            postag = sent[i - 1][1]
+            features.update({
+                &#39;-1:word.lower()&#39;: word.lower(),
+                &#39;-1:word[-3:]&#39;: word[-3:],
+                &#39;-1:word[-2:]&#39;: word[-2:],
+                &#39;-1:word.istitle()&#39;: word.istitle(),
+                &#39;-1:word.isupper()&#39;: word.isupper(),
+                &#39;-1:postag&#39;: postag,
+                &#39;-1:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+        else:
+            features[&#39;BOS&#39;] = True
+
+        if i &gt; 1:
+            word = sent[i - 2][0]
+            postag = sent[i - 2][1]
+            features.update({
+                &#39;-2:word.lower()&#39;: word.lower(),
+                &#39;-2:word[-3:]&#39;: word[-3:],
+                &#39;-2:word[-2:]&#39;: word[-2:],
+                &#39;-2:word.istitle()&#39;: word.istitle(),
+                &#39;-2:word.isupper()&#39;: word.isupper(),
+                &#39;-2:postag&#39;: postag,
+                &#39;-2:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+
+        if i &lt; len(sent) - 1:
+            word = sent[i + 1][0]
+            postag = sent[i + 1][1]
+            features.update({
+                &#39;+1:word.lower()&#39;: word.lower(),
+                &#39;+1:word[-3:]&#39;: word[-3:],
+                &#39;+1:word[-2:]&#39;: word[-2:],
+                &#39;+1:word.istitle()&#39;: word.istitle(),
+                &#39;+1:word.isupper()&#39;: word.isupper(),
+                &#39;+1:postag&#39;: postag,
+                &#39;+1:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+        else:
+            features[&#39;EOS&#39;] = True
+
+        if i &lt; len(sent) - 2:
+            word = sent[i + 2][0]
+            postag = sent[i + 2][1]
+            features.update({
+                &#39;+2:word.lower()&#39;: word.lower(),
+                &#39;+2:word[-3:]&#39;: word[-3:],
+                &#39;+2:word[-2:]&#39;: word[-2:],
+                &#39;+2:word.istitle()&#39;: word.istitle(),
+                &#39;+2:word.isupper()&#39;: word.isupper(),
+                &#39;+2:postag&#39;: postag,
+                &#39;+2:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+
+        return features
+
+    @staticmethod
+    def _sent2features(sent):
+        return [BaseNerTagger._word2features(sent, i) for i in range(len(sent))]
+
+    @staticmethod
+    def _sent2labels(sent):
+        return [label for token, postag, label in sent]
+
+    def _sent2tokens(sent):
+        return [token for token, postag, label in sent]
+
+    @staticmethod
+    def _add_prediction_to_postagged_data(postagged, prediction):
+        toret = []
+        for i in range(len(postagged)):
+            toret.append((postagged[i][0], postagged[i][1], prediction[i]))
+        return toret
+
+    @staticmethod
+    def _get_prediction_uncertainity(pred, mode=&#39;max&#39;):
+        if len(pred) == 0:
+            return 0
+        un = []
+        for tok in pred:
+            probabilities = list(tok.values())
+            ent = entropy(probabilities)
+            un.append(ent)
+        if mode == &#39;max&#39;:
+            return max(un)
+        elif mode == &#39;mean&#39;:
+            return sum(un) / len(un)
+
+    def get_new_random_example(self):
+        &#34;&#34;&#34;
+        Returns a random example to be tagged. Used to bootstrap the model.
+        Returns: Randomly selected text
+
+        &#34;&#34;&#34;
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+        self.current_example = self.unlabelled[self.current_example_index]
+        return self.current_example[&#39;raw&#39;]
+
+    def get_new_random_predicted_example(self):
+        &#34;&#34;&#34;
+        Returns a random example tagged by the currently tagged model.
+        Returns: Text String
+
+        &#34;&#34;&#34;
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+        self.current_example = self.unlabelled[self.current_example_index]
+        raw = self.current_example[&#39;raw&#39;]
+        features = BaseNerTagger._sent2features(raw)
+        preds = self.model.predict_single(features)
+        toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+        return toret
+
+    def query_new_example(self, mode=&#39;max&#39;):
+        &#34;&#34;&#34;
+        Returns a new example based on the chosen active learning strategy.
+        Args:
+            mode: Active Learning Strategy
+                - max (Default)
+                - mean
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if len(self.unlabelled) == 1:
+            sample = [0]
+        else:
+            sample = np.random.randint(0, len(self.unlabelled) - 1, size=250).tolist()
+        X = []
+        for s in sample:
+            example = self.unlabelled[s]
+            if &#39;features&#39; not in example:
+                example[&#39;features&#39;] = BaseNerTagger._sent2features(example[&#39;raw&#39;])
+            X.append(example[&#39;features&#39;])
+        preds = self.model.predict_marginals(X)
+        uncertainities = [BaseNerTagger._get_prediction_uncertainity(pred, mode) for pred in preds]
+        index = np.argmax(uncertainities)
+        self.current_example_index = sample[index]
+        self.current_example = self.unlabelled[self.current_example_index]
+        raw = self.current_example[&#39;raw&#39;]
+        features = self.current_example[&#39;features&#39;]
+        preds = self.model.predict_single(features)
+        toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+        return toret
+
+    def update_model(self):
+        &#34;&#34;&#34;
+        Updates the model with the currently labelled dataset
+        Returns:
+
+        &#34;&#34;&#34;
+        if self.model is None:
+            self.model = CRF(
+                algorithm=&#39;lbfgs&#39;,
+                c1=0.1,
+                c2=0.1,
+                max_iterations=100,
+                all_possible_transitions=True
+            )
+        X = [item[&#39;features&#39;] for item in self.labelled]
+        Y = [BaseNerTagger._sent2labels(item[&#39;raw&#39;]) for item in self.labelled]
+        self.model.fit(X, Y)
+
+    def save_example(self, data):
+        &#34;&#34;&#34;
+        Saves the current example with the user tagged data
+        Args:
+            data: User tagged data. [list of tags]
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if len(data) != len(self.current_example[&#39;raw&#39;]):
+            return False
+        else:
+            toret = []
+            for index in range(len(data)):
+                toret.append(
+                    (self.current_example[&#39;raw&#39;][index][0], self.current_example[&#39;raw&#39;][index][1], data[index][1]))
+
+            example = self.current_example
+            example[&#39;raw&#39;] = toret
+            example[&#39;features&#39;] = BaseNerTagger._sent2features(toret)
+            self.labelled.append(example)
+            self.unlabelled.pop(self.current_example_index)
+
+    def save_data(self, filepath=None):
+        &#34;&#34;&#34;
+        Saves the labelled data to a file
+        Args:
+            filepath: file to save the data in a pickle format.
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if filepath is None:
+            filepath = os.path.join(self.data_directory, &#39;ner_tagged_data.pickle&#39;)
+        with open(filepath, &#39;wb&#39;) as out:
+            pickle.dump(self.labelled, out)
+
+    def load_data(self, filepath=None):
+        &#34;&#34;&#34;
+        Loads labelled data from file.
+        Args:
+            filepath: file containing pickeled labelled dataset
+
+        Returns:
+
+        &#34;&#34;&#34;
+        with open(filepath, &#39;rb&#39;) as inp:
+            self.labelled = pickle.load(inp)
+            for lab in self.labelled:
+                lab[&#39;features&#39;] = BaseNerTagger._sent2features(lab[&#39;raw&#39;])
+
+    def add_unlabelled_examples(self, examples):
+        &#34;&#34;&#34;
+        Append more unlabelled data to dataset
+        Args:
+            examples: List of strings
+
+        Returns:
+
+        &#34;&#34;&#34;
+        new_examples = [{&#39;raw&#39;: BaseNerTagger._get_pos_tagged_example(text)} for text in examples]
+        self.unlabelled.extend(new_examples)
+
+
+list_of_colors = &#34;#e6194B, #3cb44b, #ffe119, #4363d8, #f58231, #911eb4, #42d4f4, #f032e6, #bfef45, #fabebe, #469990, &#34; \
+                 &#34;#e6beff, #9A6324, #fffac8, #800000, #aaffc3, #808000, #ffd8b1, #000075, #a9a9a9 &#34;
+list_of_colors = list_of_colors.split(&#39;, &#39;)
+
+
+
+
+
+class NerTagger:
+    def __init__(self, dataset, unique_tags, data_directory=&#39;&#39;):
+        &#34;&#34;&#34;
+        Initialize the NER tagger with a list of strings and unique tags list.
+        Args:
+            dataset: list of strings.
+            unique_tags: list of (&#39;TagID&#39;, &#39;Tag Name&#39;) tuples.
+            data_directory: default data directory.
+        &#34;&#34;&#34;
+        self.unique_tags = unique_tags
+        self.ntagger = BaseNerTagger(dataset, data_directory=data_directory)
+        self.app = NerTagger._get_app(self.ntagger, self.unique_tags)
+        self.utmapping = {t[0]: t[1] for t in self.unique_tags}
+
+    @staticmethod
+    def _is_a_tag(span):
+        if &#39;data-tag&#39; in span.attrs:
+            return True
+        return False
+
+    def _get_bilou_tags_from_html(html):
+        soup = BeautifulSoup(html, &#39;html.parser&#39;)
+        toret = []
+
+        tag_items = soup.find_all(&#39;span&#39;, attrs={&#39;data-tag&#39;: True})
+        #     return tag_items
+        tag_ids = [item.attrs[&#39;data-tag-id&#39;] for item in tag_items]
+        counter = Counter(tag_ids)
+
+        items = soup.find_all(&#39;span&#39;)
+        max_items = len(items)
+        index = 0
+        while index &lt; max_items:
+            item = items[index]
+            if NerTagger._is_a_tag(item):
+                tag_id = item.attrs[&#39;data-tag-id&#39;]
+                tag = item.attrs[&#39;data-tag&#39;]
+                size = counter[tag_id]
+                if size == 1:
+                    toret.append((item.text, f&#39;U-{tag}&#39;))
+                    index += 1
+                elif size == 2:
+                    toret.append((item.text, f&#39;B-{tag}&#39;))
+                    toret.append((items[index + 1].text, f&#39;L-{tag}&#39;))
+                    index += 2
+                else:
+                    toret.append((item.text, f&#39;B-{tag}&#39;))
+                    for i in range(size - 2):
+                        toret.append((items[index + i + 1].text, f&#39;I-{tag}&#39;))
+                    toret.append((items[index + size - 1].text, f&#39;L-{tag}&#39;))
+                    index += size
+            else:
+                toret.append((item.text, &#39;O&#39;))
+                index += 1
+
+        return toret
+
+    @staticmethod
+    def _generate_html_from_example(ex):
+        spans = []
+        if type(ex) == type({}):
+            ex = ex[&#39;raw&#39;]
+        for item in ex:
+            tag = Tag(name=&#39;span&#39;)
+            tag.insert(0, item[0])
+            spans.append(tag)
+
+        if len(ex[0]) == 3:
+            tagidcounter = 0
+            last_tag = &#39;&#39;
+            for i in range(len(ex)):
+                tag = ex[i][2]
+                if tag[0] in [&#39;B&#39;, &#39;I&#39;]:
+                    tag = tag[2:]
+                    spans[i].attrs[&#39;data-tag-id&#39;] = tagidcounter
+                    spans[i].attrs[&#39;data-tag&#39;] = tag
+                    spans[i].attrs[&#39;class&#39;] = tag
+
+                elif tag[0] in [&#39;L&#39;, &#39;U&#39;]:
+                    tag = tag[2:]
+                    spans[i].attrs[&#39;data-tag-id&#39;] = tagidcounter
+                    spans[i].attrs[&#39;data-tag&#39;] = tag
+                    spans[i].attrs[&#39;class&#39;] = tag
+                    tagidcounter += 1
+
+        soup = BeautifulSoup(features=&#39;html.parser&#39;)
+        soup.extend(spans)
+        return str(soup)
+
+
+    @staticmethod
+    def _render_app_template(unique_tags_data):
+        &#34;&#34;&#34;
+        Tag data list of tuples (tag_id, readable_tag_name)
+        Args:
+            unique_tags_data: list of tag tuples
+
+        Returns: html template to render
+
+        &#34;&#34;&#34;
+
+        if len(unique_tags_data) &gt; len(list_of_colors):
+            return &#34;Too many tags. Add more colors to list_of_colors&#34;
+
+        trainer_path = os.path.join(os.path.dirname(__file__), &#39;html_templates&#39;, &#39;ner_trainer.html&#39;)
+        with open(trainer_path) as templ:
+            template = Template(templ.read())
+
+        css_classes = []
+        for index, item in enumerate(unique_tags_data):
+            css_classes.append((item[0], list_of_colors[index]))
+
+        return template.render(css_classes=css_classes, id_color_map=css_classes, tag_controls=unique_tags_data)
+
+
+    @staticmethod
+    def _get_app(ntagger, tags):
+        app = Flask(__name__)
+
+        @app.route(&#34;/&#34;)
+        def base_app():
+            return NerTagger._render_app_template(tags)
+
+        @app.route(&#39;/load_example&#39;)
+        def load_example():
+            if ntagger.model is None:
+                example = ntagger.get_new_random_example()
+            else:
+                example = ntagger.query_new_example(mode=&#39;max&#39;)
+
+            html = NerTagger._generate_html_from_example(example)
+            return html
+
+        @app.route(&#39;/update_model&#39;)
+        def update_model():
+            ntagger.update_model()
+            return &#34;Model Updated Successfully&#34;
+
+        @app.route(&#39;/save_example&#39;, methods=[&#39;POST&#39;])
+        def save_example():
+            form_data = request.form
+            html = form_data[&#39;html&#39;]
+            user_tags = NerTagger._get_bilou_tags_from_html(html)
+            ntagger.save_example(user_tags)
+            return &#39;Success&#39;
+
+        @app.route(&#39;/save_data&#39;)
+        def save_tagged_data():
+            print(&#34;save_tagged_data&#34;)
+            ntagger.save_data()
+            return &#39;Data Saved&#39;
+
+        return app
+
+
+    def start_server(self, port=None):
+        &#34;&#34;&#34;
+        Start the ner tagging server
+        Args:
+            port: Port number to bind the server to.
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if port:
+            self.app.run(port)
+        else:
+            self.app.run(port=5050)
+
+    def add_unlabelled_examples(self, examples):
+        &#34;&#34;&#34;
+        Append unlabelled examples to dataset
+        Args:
+            examples: list of strings
+
+        Returns:
+
+        &#34;&#34;&#34;
+        self.ntagger.add_unlabelled_examples(examples)
+
+    def save_labelled_examples(self, filepath):
+        &#34;&#34;&#34;
+        Save labelled examples to file
+        Args:
+            filepath: destination filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.save_data(filepath)
+
+    def load_labelled_examples(self, filepath):
+        &#34;&#34;&#34;
+        Load labelled examples to the dataset
+        Args:
+            filepath: source filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.load_data(filepath)
+
+    def save_model(self, model_filename):
+        &#34;&#34;&#34;
+        Save ner model to file
+        Args:
+            model_filename: model filepath
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        with open(model_filename, &#39;wb&#39;) as out:
+            pickle.dump(self.ntagger.model, out)
+
+    def load_model(self, model_filename):
+        &#34;&#34;&#34;
+        Load ner model from file
+        Args:
+            model_filename: source filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        with open(model_filename, &#39;rb&#39;) as inp:
+            self.ntagger.model = pickle.load(inp)
+
+    def update_model(self):
+        &#34;&#34;&#34;
+        Updates the model
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.update_model()
+
+    def find_entities_in_text(self, text):
+        text = BaseNerTagger._get_pos_tagged_example(text)
+        features = BaseNerTagger._sent2features(text)
+        prediction = self.ntagger.model.predict_single(features)
+        lst = zip([t[0] for t in text], prediction)
+        curr_ent = &#39;O&#39;
+        ent_toks = []
+        entities = []
+        for item in lst:
+            text = item[0]
+            tag = item[1]
+            if tag.startswith(&#39;B-&#39;):
+                if len(ent_toks) &gt; 0:
+                    entities.append({
+                        &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                        &#39;entity&#39;: self.utmapping[curr_ent],
+                    })
+                    ent_toks = []
+                curr_ent = tag[2:]
+                ent_toks.append(text)
+            elif tag.startswith(&#39;I-&#39;):
+                if curr_ent == &#39;O&#39;:
+                    continue
+                ent_toks.append(text)
+            elif tag.startswith(&#39;L-&#39;):
+                if curr_ent == &#39;O&#39;:
+                    continue
+                ent_toks.append(text)
+                entities.append({
+                    &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+                ent_toks = []
+            elif tag.startswith(&#39;U-&#39;):
+                curr_ent = tag[2:]
+                ent_toks = []
+                entities.append({
+                    &#39;value&#39;: text,
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+            elif tag.startswith(&#39;O&#39;):
+                if len(ent_toks) &gt; 0:
+                    entities.append({
+                        &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                        &#39;entity&#39;: self.utmapping[curr_ent],
+                    })
+                ent_toks = []
+                curr_ent = &#39;O&#39;
+
+        if len(ent_toks) &gt; 0:
+            entities.append({
+                &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                &#39;entity&#39;: self.utmapping[curr_ent],
+            })
+        return entities
+
+
+if __name__ == &#39;__main__&#39;:
+    # Unique Tags / Classes
+    # tags are given in the below format.
+    tags = [
+        (&#34;CT&#34;, &#34;Course Title&#34;),
+        (&#34;CC&#34;, &#34;Course Code&#34;),
+        (&#34;PREQ&#34;, &#34;Pre-requisites&#34;),
+        (&#34;PROF&#34;, &#34;Professor&#34;),
+        (&#34;SE&#34;, &#34;Season&#34;),
+        (&#34;CR&#34;, &#34;Credits&#34;)
+    ]
+
+    texts = [
+        &#39;text one&#39;,
+        &#39;text two&#39;,
+        &#39;text three&#39;,
+        &#39;this is text four&#39;
+    ]
+
+    tgr = NerTagger(texts, tags)
+    tgr.start_server()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="NERD.NER.BaseNerTagger"><code class="flex name class">
+<span>class <span class="ident">BaseNerTagger</span></span>
+<span>(</span><span>unlabelled, labelled=None, data_directory='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>A utility class for NER Tagging.</p>
+<p>Initialize with a list of unlabelled strings and/or list of tagged tuples.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>unlabelled</code></strong></dt>
+<dd>list of strings</dd>
+<dt><strong><code>labelled</code></strong></dt>
+<dd>list of {list of tuples [(token, pos_tag, tag), &hellip;]}</dd>
+<dt><strong><code>data_directory</code></strong></dt>
+<dd>Default directory to save all data</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BaseNerTagger:
+    &#34;&#34;&#34;
+    A utility class for NER Tagging.
+    &#34;&#34;&#34;
+
+    def __init__(self, unlabelled, labelled=None, data_directory=&#39;&#39;):
+        &#34;&#34;&#34;
+        Initialize with a list of unlabelled strings and/or list of tagged tuples.
+        Args:
+            unlabelled: list of strings
+            labelled: list of {list of tuples [(token, pos_tag, tag), ...]}
+            data_directory: Default directory to save all data
+        &#34;&#34;&#34;
+        if unlabelled is None:
+            self.unlabelled = None
+        else:
+            self.unlabelled = [{&#39;raw&#39;: BaseNerTagger._get_pos_tagged_example(text)} for text in unlabelled]
+        if labelled is None:
+            labelled = []
+        self.labelled = labelled
+        self.model = None
+
+        self.data_directory = os.path.join(data_directory, &#39;NER_Data&#39;)
+        os.makedirs(self.data_directory, exist_ok=True)
+
+
+    @staticmethod
+    def _get_pos_tagged_example(text):
+        tokens = word_tokenize(text)
+        toret = pos_tag(tokens)
+        return toret
+
+    @staticmethod
+    def _is_alpha_and_numeric(string):
+        &#34;&#34;&#34;
+        Checks whether the string is alpha/numeric or both
+        Args:
+            string: text string
+
+        Returns: alpha numeric class [DIGIT/ALPHA_UPPER/ALPHA_LOWER/ALPHA/ALPHA_NUM/EMPTY]
+
+        &#34;&#34;&#34;
+        toret = &#39;&#39;
+        if string.isdigit():
+            toret = &#39;DIGIT&#39;
+        elif string.isalpha():
+            if string.isupper():
+                toret = &#39;ALPHA_UPPER&#39;
+            elif string.islower():
+                toret = &#39;ALPHA_LOWER&#39;
+            else:
+                toret = &#39;ALPHA&#39;
+        elif len(string) &gt; 0:
+            toks = [string[0], string[-1]]
+            alphanum = 0
+            for tok in toks:
+                if tok.isdigit():
+                    alphanum += 1
+                elif tok.isalpha():
+                    alphanum -= 1
+            if alphanum == 0:
+                toret = &#39;ALPHA_NUM&#39;
+        else:
+            toret = &#39;EMPTY&#39;
+
+        return toret
+
+    @staticmethod
+    def _word2features(sent, i):
+        &#34;&#34;&#34;
+        Calculate features for each word in the sentence
+        Args:
+            sent: List of words in the sentence
+            i: i&#39;th word in the sentence
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        word = sent[i][0]
+        postag = sent[i][1]
+
+        features = {
+            &#39;bias&#39;: 1.0,
+            &#39;word.lower()&#39;: word.lower(),
+            &#39;word[-3:]&#39;: word[-3:],
+            &#39;word[-2:]&#39;: word[-2:],
+            &#39;word.isupper()&#39;: word.isupper(),
+            &#39;word.istitle()&#39;: word.istitle(),
+            &#39;word.isdigit()&#39;: word.isdigit(),
+            &#39;word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word),
+            &#39;postag&#39;: postag,
+        }
+
+        if i &gt; 0:
+            word = sent[i - 1][0]
+            postag = sent[i - 1][1]
+            features.update({
+                &#39;-1:word.lower()&#39;: word.lower(),
+                &#39;-1:word[-3:]&#39;: word[-3:],
+                &#39;-1:word[-2:]&#39;: word[-2:],
+                &#39;-1:word.istitle()&#39;: word.istitle(),
+                &#39;-1:word.isupper()&#39;: word.isupper(),
+                &#39;-1:postag&#39;: postag,
+                &#39;-1:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+        else:
+            features[&#39;BOS&#39;] = True
+
+        if i &gt; 1:
+            word = sent[i - 2][0]
+            postag = sent[i - 2][1]
+            features.update({
+                &#39;-2:word.lower()&#39;: word.lower(),
+                &#39;-2:word[-3:]&#39;: word[-3:],
+                &#39;-2:word[-2:]&#39;: word[-2:],
+                &#39;-2:word.istitle()&#39;: word.istitle(),
+                &#39;-2:word.isupper()&#39;: word.isupper(),
+                &#39;-2:postag&#39;: postag,
+                &#39;-2:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+
+        if i &lt; len(sent) - 1:
+            word = sent[i + 1][0]
+            postag = sent[i + 1][1]
+            features.update({
+                &#39;+1:word.lower()&#39;: word.lower(),
+                &#39;+1:word[-3:]&#39;: word[-3:],
+                &#39;+1:word[-2:]&#39;: word[-2:],
+                &#39;+1:word.istitle()&#39;: word.istitle(),
+                &#39;+1:word.isupper()&#39;: word.isupper(),
+                &#39;+1:postag&#39;: postag,
+                &#39;+1:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+        else:
+            features[&#39;EOS&#39;] = True
+
+        if i &lt; len(sent) - 2:
+            word = sent[i + 2][0]
+            postag = sent[i + 2][1]
+            features.update({
+                &#39;+2:word.lower()&#39;: word.lower(),
+                &#39;+2:word[-3:]&#39;: word[-3:],
+                &#39;+2:word[-2:]&#39;: word[-2:],
+                &#39;+2:word.istitle()&#39;: word.istitle(),
+                &#39;+2:word.isupper()&#39;: word.isupper(),
+                &#39;+2:postag&#39;: postag,
+                &#39;+2:word.is_alphanum&#39;: BaseNerTagger._is_alpha_and_numeric(word)
+            })
+
+        return features
+
+    @staticmethod
+    def _sent2features(sent):
+        return [BaseNerTagger._word2features(sent, i) for i in range(len(sent))]
+
+    @staticmethod
+    def _sent2labels(sent):
+        return [label for token, postag, label in sent]
+
+    def _sent2tokens(sent):
+        return [token for token, postag, label in sent]
+
+    @staticmethod
+    def _add_prediction_to_postagged_data(postagged, prediction):
+        toret = []
+        for i in range(len(postagged)):
+            toret.append((postagged[i][0], postagged[i][1], prediction[i]))
+        return toret
+
+    @staticmethod
+    def _get_prediction_uncertainity(pred, mode=&#39;max&#39;):
+        if len(pred) == 0:
+            return 0
+        un = []
+        for tok in pred:
+            probabilities = list(tok.values())
+            ent = entropy(probabilities)
+            un.append(ent)
+        if mode == &#39;max&#39;:
+            return max(un)
+        elif mode == &#39;mean&#39;:
+            return sum(un) / len(un)
+
+    def get_new_random_example(self):
+        &#34;&#34;&#34;
+        Returns a random example to be tagged. Used to bootstrap the model.
+        Returns: Randomly selected text
+
+        &#34;&#34;&#34;
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+        self.current_example = self.unlabelled[self.current_example_index]
+        return self.current_example[&#39;raw&#39;]
+
+    def get_new_random_predicted_example(self):
+        &#34;&#34;&#34;
+        Returns a random example tagged by the currently tagged model.
+        Returns: Text String
+
+        &#34;&#34;&#34;
+        self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+        self.current_example = self.unlabelled[self.current_example_index]
+        raw = self.current_example[&#39;raw&#39;]
+        features = BaseNerTagger._sent2features(raw)
+        preds = self.model.predict_single(features)
+        toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+        return toret
+
+    def query_new_example(self, mode=&#39;max&#39;):
+        &#34;&#34;&#34;
+        Returns a new example based on the chosen active learning strategy.
+        Args:
+            mode: Active Learning Strategy
+                - max (Default)
+                - mean
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if len(self.unlabelled) == 1:
+            sample = [0]
+        else:
+            sample = np.random.randint(0, len(self.unlabelled) - 1, size=250).tolist()
+        X = []
+        for s in sample:
+            example = self.unlabelled[s]
+            if &#39;features&#39; not in example:
+                example[&#39;features&#39;] = BaseNerTagger._sent2features(example[&#39;raw&#39;])
+            X.append(example[&#39;features&#39;])
+        preds = self.model.predict_marginals(X)
+        uncertainities = [BaseNerTagger._get_prediction_uncertainity(pred, mode) for pred in preds]
+        index = np.argmax(uncertainities)
+        self.current_example_index = sample[index]
+        self.current_example = self.unlabelled[self.current_example_index]
+        raw = self.current_example[&#39;raw&#39;]
+        features = self.current_example[&#39;features&#39;]
+        preds = self.model.predict_single(features)
+        toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+        return toret
+
+    def update_model(self):
+        &#34;&#34;&#34;
+        Updates the model with the currently labelled dataset
+        Returns:
+
+        &#34;&#34;&#34;
+        if self.model is None:
+            self.model = CRF(
+                algorithm=&#39;lbfgs&#39;,
+                c1=0.1,
+                c2=0.1,
+                max_iterations=100,
+                all_possible_transitions=True
+            )
+        X = [item[&#39;features&#39;] for item in self.labelled]
+        Y = [BaseNerTagger._sent2labels(item[&#39;raw&#39;]) for item in self.labelled]
+        self.model.fit(X, Y)
+
+    def save_example(self, data):
+        &#34;&#34;&#34;
+        Saves the current example with the user tagged data
+        Args:
+            data: User tagged data. [list of tags]
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if len(data) != len(self.current_example[&#39;raw&#39;]):
+            return False
+        else:
+            toret = []
+            for index in range(len(data)):
+                toret.append(
+                    (self.current_example[&#39;raw&#39;][index][0], self.current_example[&#39;raw&#39;][index][1], data[index][1]))
+
+            example = self.current_example
+            example[&#39;raw&#39;] = toret
+            example[&#39;features&#39;] = BaseNerTagger._sent2features(toret)
+            self.labelled.append(example)
+            self.unlabelled.pop(self.current_example_index)
+
+    def save_data(self, filepath=None):
+        &#34;&#34;&#34;
+        Saves the labelled data to a file
+        Args:
+            filepath: file to save the data in a pickle format.
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if filepath is None:
+            filepath = os.path.join(self.data_directory, &#39;ner_tagged_data.pickle&#39;)
+        with open(filepath, &#39;wb&#39;) as out:
+            pickle.dump(self.labelled, out)
+
+    def load_data(self, filepath=None):
+        &#34;&#34;&#34;
+        Loads labelled data from file.
+        Args:
+            filepath: file containing pickeled labelled dataset
+
+        Returns:
+
+        &#34;&#34;&#34;
+        with open(filepath, &#39;rb&#39;) as inp:
+            self.labelled = pickle.load(inp)
+            for lab in self.labelled:
+                lab[&#39;features&#39;] = BaseNerTagger._sent2features(lab[&#39;raw&#39;])
+
+    def add_unlabelled_examples(self, examples):
+        &#34;&#34;&#34;
+        Append more unlabelled data to dataset
+        Args:
+            examples: List of strings
+
+        Returns:
+
+        &#34;&#34;&#34;
+        new_examples = [{&#39;raw&#39;: BaseNerTagger._get_pos_tagged_example(text)} for text in examples]
+        self.unlabelled.extend(new_examples)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="NERD.NER.BaseNerTagger.add_unlabelled_examples"><code class="name flex">
+<span>def <span class="ident">add_unlabelled_examples</span></span>(<span>self, examples)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Append more unlabelled data to dataset</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>examples</code></strong></dt>
+<dd>List of strings</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_unlabelled_examples(self, examples):
+    &#34;&#34;&#34;
+    Append more unlabelled data to dataset
+    Args:
+        examples: List of strings
+
+    Returns:
+
+    &#34;&#34;&#34;
+    new_examples = [{&#39;raw&#39;: BaseNerTagger._get_pos_tagged_example(text)} for text in examples]
+    self.unlabelled.extend(new_examples)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.get_new_random_example"><code class="name flex">
+<span>def <span class="ident">get_new_random_example</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns a random example to be tagged. Used to bootstrap the model.
+Returns: Randomly selected text</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_new_random_example(self):
+    &#34;&#34;&#34;
+    Returns a random example to be tagged. Used to bootstrap the model.
+    Returns: Randomly selected text
+
+    &#34;&#34;&#34;
+    self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+    self.current_example = self.unlabelled[self.current_example_index]
+    return self.current_example[&#39;raw&#39;]</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.get_new_random_predicted_example"><code class="name flex">
+<span>def <span class="ident">get_new_random_predicted_example</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns a random example tagged by the currently tagged model.
+Returns: Text String</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_new_random_predicted_example(self):
+    &#34;&#34;&#34;
+    Returns a random example tagged by the currently tagged model.
+    Returns: Text String
+
+    &#34;&#34;&#34;
+    self.current_example_index = random.randint(0, len(self.unlabelled) - 1)
+    self.current_example = self.unlabelled[self.current_example_index]
+    raw = self.current_example[&#39;raw&#39;]
+    features = BaseNerTagger._sent2features(raw)
+    preds = self.model.predict_single(features)
+    toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+    return toret</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.load_data"><code class="name flex">
+<span>def <span class="ident">load_data</span></span>(<span>self, filepath=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Loads labelled data from file.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filepath</code></strong></dt>
+<dd>file containing pickeled labelled dataset</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_data(self, filepath=None):
+    &#34;&#34;&#34;
+    Loads labelled data from file.
+    Args:
+        filepath: file containing pickeled labelled dataset
+
+    Returns:
+
+    &#34;&#34;&#34;
+    with open(filepath, &#39;rb&#39;) as inp:
+        self.labelled = pickle.load(inp)
+        for lab in self.labelled:
+            lab[&#39;features&#39;] = BaseNerTagger._sent2features(lab[&#39;raw&#39;])</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.query_new_example"><code class="name flex">
+<span>def <span class="ident">query_new_example</span></span>(<span>self, mode='max')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Returns a new example based on the chosen active learning strategy.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mode</code></strong></dt>
+<dd>Active Learning Strategy
+- max (Default)
+- mean</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def query_new_example(self, mode=&#39;max&#39;):
+    &#34;&#34;&#34;
+    Returns a new example based on the chosen active learning strategy.
+    Args:
+        mode: Active Learning Strategy
+            - max (Default)
+            - mean
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if len(self.unlabelled) == 1:
+        sample = [0]
+    else:
+        sample = np.random.randint(0, len(self.unlabelled) - 1, size=250).tolist()
+    X = []
+    for s in sample:
+        example = self.unlabelled[s]
+        if &#39;features&#39; not in example:
+            example[&#39;features&#39;] = BaseNerTagger._sent2features(example[&#39;raw&#39;])
+        X.append(example[&#39;features&#39;])
+    preds = self.model.predict_marginals(X)
+    uncertainities = [BaseNerTagger._get_prediction_uncertainity(pred, mode) for pred in preds]
+    index = np.argmax(uncertainities)
+    self.current_example_index = sample[index]
+    self.current_example = self.unlabelled[self.current_example_index]
+    raw = self.current_example[&#39;raw&#39;]
+    features = self.current_example[&#39;features&#39;]
+    preds = self.model.predict_single(features)
+    toret = BaseNerTagger._add_prediction_to_postagged_data(raw, preds)
+    return toret</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.save_data"><code class="name flex">
+<span>def <span class="ident">save_data</span></span>(<span>self, filepath=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Saves the labelled data to a file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filepath</code></strong></dt>
+<dd>file to save the data in a pickle format.</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_data(self, filepath=None):
+    &#34;&#34;&#34;
+    Saves the labelled data to a file
+    Args:
+        filepath: file to save the data in a pickle format.
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if filepath is None:
+        filepath = os.path.join(self.data_directory, &#39;ner_tagged_data.pickle&#39;)
+    with open(filepath, &#39;wb&#39;) as out:
+        pickle.dump(self.labelled, out)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.save_example"><code class="name flex">
+<span>def <span class="ident">save_example</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Saves the current example with the user tagged data</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>data</code></strong></dt>
+<dd>User tagged data. [list of tags]</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_example(self, data):
+    &#34;&#34;&#34;
+    Saves the current example with the user tagged data
+    Args:
+        data: User tagged data. [list of tags]
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if len(data) != len(self.current_example[&#39;raw&#39;]):
+        return False
+    else:
+        toret = []
+        for index in range(len(data)):
+            toret.append(
+                (self.current_example[&#39;raw&#39;][index][0], self.current_example[&#39;raw&#39;][index][1], data[index][1]))
+
+        example = self.current_example
+        example[&#39;raw&#39;] = toret
+        example[&#39;features&#39;] = BaseNerTagger._sent2features(toret)
+        self.labelled.append(example)
+        self.unlabelled.pop(self.current_example_index)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.BaseNerTagger.update_model"><code class="name flex">
+<span>def <span class="ident">update_model</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Updates the model with the currently labelled dataset
+Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_model(self):
+    &#34;&#34;&#34;
+    Updates the model with the currently labelled dataset
+    Returns:
+
+    &#34;&#34;&#34;
+    if self.model is None:
+        self.model = CRF(
+            algorithm=&#39;lbfgs&#39;,
+            c1=0.1,
+            c2=0.1,
+            max_iterations=100,
+            all_possible_transitions=True
+        )
+    X = [item[&#39;features&#39;] for item in self.labelled]
+    Y = [BaseNerTagger._sent2labels(item[&#39;raw&#39;]) for item in self.labelled]
+    self.model.fit(X, Y)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="NERD.NER.NerTagger"><code class="flex name class">
+<span>class <span class="ident">NerTagger</span></span>
+<span>(</span><span>dataset, unique_tags, data_directory='')</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize the NER tagger with a list of strings and unique tags list.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dataset</code></strong></dt>
+<dd>list of strings.</dd>
+<dt><strong><code>unique_tags</code></strong></dt>
+<dd>list of ('TagID', 'Tag Name') tuples.</dd>
+<dt><strong><code>data_directory</code></strong></dt>
+<dd>default data directory.</dd>
+</dl></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NerTagger:
+    def __init__(self, dataset, unique_tags, data_directory=&#39;&#39;):
+        &#34;&#34;&#34;
+        Initialize the NER tagger with a list of strings and unique tags list.
+        Args:
+            dataset: list of strings.
+            unique_tags: list of (&#39;TagID&#39;, &#39;Tag Name&#39;) tuples.
+            data_directory: default data directory.
+        &#34;&#34;&#34;
+        self.unique_tags = unique_tags
+        self.ntagger = BaseNerTagger(dataset, data_directory=data_directory)
+        self.app = NerTagger._get_app(self.ntagger, self.unique_tags)
+        self.utmapping = {t[0]: t[1] for t in self.unique_tags}
+
+    @staticmethod
+    def _is_a_tag(span):
+        if &#39;data-tag&#39; in span.attrs:
+            return True
+        return False
+
+    def _get_bilou_tags_from_html(html):
+        soup = BeautifulSoup(html, &#39;html.parser&#39;)
+        toret = []
+
+        tag_items = soup.find_all(&#39;span&#39;, attrs={&#39;data-tag&#39;: True})
+        #     return tag_items
+        tag_ids = [item.attrs[&#39;data-tag-id&#39;] for item in tag_items]
+        counter = Counter(tag_ids)
+
+        items = soup.find_all(&#39;span&#39;)
+        max_items = len(items)
+        index = 0
+        while index &lt; max_items:
+            item = items[index]
+            if NerTagger._is_a_tag(item):
+                tag_id = item.attrs[&#39;data-tag-id&#39;]
+                tag = item.attrs[&#39;data-tag&#39;]
+                size = counter[tag_id]
+                if size == 1:
+                    toret.append((item.text, f&#39;U-{tag}&#39;))
+                    index += 1
+                elif size == 2:
+                    toret.append((item.text, f&#39;B-{tag}&#39;))
+                    toret.append((items[index + 1].text, f&#39;L-{tag}&#39;))
+                    index += 2
+                else:
+                    toret.append((item.text, f&#39;B-{tag}&#39;))
+                    for i in range(size - 2):
+                        toret.append((items[index + i + 1].text, f&#39;I-{tag}&#39;))
+                    toret.append((items[index + size - 1].text, f&#39;L-{tag}&#39;))
+                    index += size
+            else:
+                toret.append((item.text, &#39;O&#39;))
+                index += 1
+
+        return toret
+
+    @staticmethod
+    def _generate_html_from_example(ex):
+        spans = []
+        if type(ex) == type({}):
+            ex = ex[&#39;raw&#39;]
+        for item in ex:
+            tag = Tag(name=&#39;span&#39;)
+            tag.insert(0, item[0])
+            spans.append(tag)
+
+        if len(ex[0]) == 3:
+            tagidcounter = 0
+            last_tag = &#39;&#39;
+            for i in range(len(ex)):
+                tag = ex[i][2]
+                if tag[0] in [&#39;B&#39;, &#39;I&#39;]:
+                    tag = tag[2:]
+                    spans[i].attrs[&#39;data-tag-id&#39;] = tagidcounter
+                    spans[i].attrs[&#39;data-tag&#39;] = tag
+                    spans[i].attrs[&#39;class&#39;] = tag
+
+                elif tag[0] in [&#39;L&#39;, &#39;U&#39;]:
+                    tag = tag[2:]
+                    spans[i].attrs[&#39;data-tag-id&#39;] = tagidcounter
+                    spans[i].attrs[&#39;data-tag&#39;] = tag
+                    spans[i].attrs[&#39;class&#39;] = tag
+                    tagidcounter += 1
+
+        soup = BeautifulSoup(features=&#39;html.parser&#39;)
+        soup.extend(spans)
+        return str(soup)
+
+
+    @staticmethod
+    def _render_app_template(unique_tags_data):
+        &#34;&#34;&#34;
+        Tag data list of tuples (tag_id, readable_tag_name)
+        Args:
+            unique_tags_data: list of tag tuples
+
+        Returns: html template to render
+
+        &#34;&#34;&#34;
+
+        if len(unique_tags_data) &gt; len(list_of_colors):
+            return &#34;Too many tags. Add more colors to list_of_colors&#34;
+
+        trainer_path = os.path.join(os.path.dirname(__file__), &#39;html_templates&#39;, &#39;ner_trainer.html&#39;)
+        with open(trainer_path) as templ:
+            template = Template(templ.read())
+
+        css_classes = []
+        for index, item in enumerate(unique_tags_data):
+            css_classes.append((item[0], list_of_colors[index]))
+
+        return template.render(css_classes=css_classes, id_color_map=css_classes, tag_controls=unique_tags_data)
+
+
+    @staticmethod
+    def _get_app(ntagger, tags):
+        app = Flask(__name__)
+
+        @app.route(&#34;/&#34;)
+        def base_app():
+            return NerTagger._render_app_template(tags)
+
+        @app.route(&#39;/load_example&#39;)
+        def load_example():
+            if ntagger.model is None:
+                example = ntagger.get_new_random_example()
+            else:
+                example = ntagger.query_new_example(mode=&#39;max&#39;)
+
+            html = NerTagger._generate_html_from_example(example)
+            return html
+
+        @app.route(&#39;/update_model&#39;)
+        def update_model():
+            ntagger.update_model()
+            return &#34;Model Updated Successfully&#34;
+
+        @app.route(&#39;/save_example&#39;, methods=[&#39;POST&#39;])
+        def save_example():
+            form_data = request.form
+            html = form_data[&#39;html&#39;]
+            user_tags = NerTagger._get_bilou_tags_from_html(html)
+            ntagger.save_example(user_tags)
+            return &#39;Success&#39;
+
+        @app.route(&#39;/save_data&#39;)
+        def save_tagged_data():
+            print(&#34;save_tagged_data&#34;)
+            ntagger.save_data()
+            return &#39;Data Saved&#39;
+
+        return app
+
+
+    def start_server(self, port=None):
+        &#34;&#34;&#34;
+        Start the ner tagging server
+        Args:
+            port: Port number to bind the server to.
+
+        Returns:
+
+        &#34;&#34;&#34;
+        if port:
+            self.app.run(port)
+        else:
+            self.app.run(port=5050)
+
+    def add_unlabelled_examples(self, examples):
+        &#34;&#34;&#34;
+        Append unlabelled examples to dataset
+        Args:
+            examples: list of strings
+
+        Returns:
+
+        &#34;&#34;&#34;
+        self.ntagger.add_unlabelled_examples(examples)
+
+    def save_labelled_examples(self, filepath):
+        &#34;&#34;&#34;
+        Save labelled examples to file
+        Args:
+            filepath: destination filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.save_data(filepath)
+
+    def load_labelled_examples(self, filepath):
+        &#34;&#34;&#34;
+        Load labelled examples to the dataset
+        Args:
+            filepath: source filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.load_data(filepath)
+
+    def save_model(self, model_filename):
+        &#34;&#34;&#34;
+        Save ner model to file
+        Args:
+            model_filename: model filepath
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        with open(model_filename, &#39;wb&#39;) as out:
+            pickle.dump(self.ntagger.model, out)
+
+    def load_model(self, model_filename):
+        &#34;&#34;&#34;
+        Load ner model from file
+        Args:
+            model_filename: source filename
+
+        Returns:
+
+        &#34;&#34;&#34;
+
+        with open(model_filename, &#39;rb&#39;) as inp:
+            self.ntagger.model = pickle.load(inp)
+
+    def update_model(self):
+        &#34;&#34;&#34;
+        Updates the model
+        Returns:
+
+        &#34;&#34;&#34;
+
+        self.ntagger.update_model()
+
+    def find_entities_in_text(self, text):
+        text = BaseNerTagger._get_pos_tagged_example(text)
+        features = BaseNerTagger._sent2features(text)
+        prediction = self.ntagger.model.predict_single(features)
+        lst = zip([t[0] for t in text], prediction)
+        curr_ent = &#39;O&#39;
+        ent_toks = []
+        entities = []
+        for item in lst:
+            text = item[0]
+            tag = item[1]
+            if tag.startswith(&#39;B-&#39;):
+                if len(ent_toks) &gt; 0:
+                    entities.append({
+                        &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                        &#39;entity&#39;: self.utmapping[curr_ent],
+                    })
+                    ent_toks = []
+                curr_ent = tag[2:]
+                ent_toks.append(text)
+            elif tag.startswith(&#39;I-&#39;):
+                if curr_ent == &#39;O&#39;:
+                    continue
+                ent_toks.append(text)
+            elif tag.startswith(&#39;L-&#39;):
+                if curr_ent == &#39;O&#39;:
+                    continue
+                ent_toks.append(text)
+                entities.append({
+                    &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+                ent_toks = []
+            elif tag.startswith(&#39;U-&#39;):
+                curr_ent = tag[2:]
+                ent_toks = []
+                entities.append({
+                    &#39;value&#39;: text,
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+            elif tag.startswith(&#39;O&#39;):
+                if len(ent_toks) &gt; 0:
+                    entities.append({
+                        &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                        &#39;entity&#39;: self.utmapping[curr_ent],
+                    })
+                ent_toks = []
+                curr_ent = &#39;O&#39;
+
+        if len(ent_toks) &gt; 0:
+            entities.append({
+                &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                &#39;entity&#39;: self.utmapping[curr_ent],
+            })
+        return entities</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="NERD.NER.NerTagger.add_unlabelled_examples"><code class="name flex">
+<span>def <span class="ident">add_unlabelled_examples</span></span>(<span>self, examples)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Append unlabelled examples to dataset</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>examples</code></strong></dt>
+<dd>list of strings</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_unlabelled_examples(self, examples):
+    &#34;&#34;&#34;
+    Append unlabelled examples to dataset
+    Args:
+        examples: list of strings
+
+    Returns:
+
+    &#34;&#34;&#34;
+    self.ntagger.add_unlabelled_examples(examples)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.find_entities_in_text"><code class="name flex">
+<span>def <span class="ident">find_entities_in_text</span></span>(<span>self, text)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_entities_in_text(self, text):
+    text = BaseNerTagger._get_pos_tagged_example(text)
+    features = BaseNerTagger._sent2features(text)
+    prediction = self.ntagger.model.predict_single(features)
+    lst = zip([t[0] for t in text], prediction)
+    curr_ent = &#39;O&#39;
+    ent_toks = []
+    entities = []
+    for item in lst:
+        text = item[0]
+        tag = item[1]
+        if tag.startswith(&#39;B-&#39;):
+            if len(ent_toks) &gt; 0:
+                entities.append({
+                    &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+                ent_toks = []
+            curr_ent = tag[2:]
+            ent_toks.append(text)
+        elif tag.startswith(&#39;I-&#39;):
+            if curr_ent == &#39;O&#39;:
+                continue
+            ent_toks.append(text)
+        elif tag.startswith(&#39;L-&#39;):
+            if curr_ent == &#39;O&#39;:
+                continue
+            ent_toks.append(text)
+            entities.append({
+                &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                &#39;entity&#39;: self.utmapping[curr_ent],
+            })
+            ent_toks = []
+        elif tag.startswith(&#39;U-&#39;):
+            curr_ent = tag[2:]
+            ent_toks = []
+            entities.append({
+                &#39;value&#39;: text,
+                &#39;entity&#39;: self.utmapping[curr_ent],
+            })
+        elif tag.startswith(&#39;O&#39;):
+            if len(ent_toks) &gt; 0:
+                entities.append({
+                    &#39;value&#39;: &#39; &#39;.join(ent_toks),
+                    &#39;entity&#39;: self.utmapping[curr_ent],
+                })
+            ent_toks = []
+            curr_ent = &#39;O&#39;
+
+    if len(ent_toks) &gt; 0:
+        entities.append({
+            &#39;value&#39;: &#39; &#39;.join(ent_toks),
+            &#39;entity&#39;: self.utmapping[curr_ent],
+        })
+    return entities</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.load_labelled_examples"><code class="name flex">
+<span>def <span class="ident">load_labelled_examples</span></span>(<span>self, filepath)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Load labelled examples to the dataset</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filepath</code></strong></dt>
+<dd>source filename</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_labelled_examples(self, filepath):
+    &#34;&#34;&#34;
+    Load labelled examples to the dataset
+    Args:
+        filepath: source filename
+
+    Returns:
+
+    &#34;&#34;&#34;
+
+    self.ntagger.load_data(filepath)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.load_model"><code class="name flex">
+<span>def <span class="ident">load_model</span></span>(<span>self, model_filename)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Load ner model from file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_filename</code></strong></dt>
+<dd>source filename</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_model(self, model_filename):
+    &#34;&#34;&#34;
+    Load ner model from file
+    Args:
+        model_filename: source filename
+
+    Returns:
+
+    &#34;&#34;&#34;
+
+    with open(model_filename, &#39;rb&#39;) as inp:
+        self.ntagger.model = pickle.load(inp)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.save_labelled_examples"><code class="name flex">
+<span>def <span class="ident">save_labelled_examples</span></span>(<span>self, filepath)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Save labelled examples to file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>filepath</code></strong></dt>
+<dd>destination filename</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_labelled_examples(self, filepath):
+    &#34;&#34;&#34;
+    Save labelled examples to file
+    Args:
+        filepath: destination filename
+
+    Returns:
+
+    &#34;&#34;&#34;
+
+    self.ntagger.save_data(filepath)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.save_model"><code class="name flex">
+<span>def <span class="ident">save_model</span></span>(<span>self, model_filename)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Save ner model to file</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_filename</code></strong></dt>
+<dd>model filepath</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_model(self, model_filename):
+    &#34;&#34;&#34;
+    Save ner model to file
+    Args:
+        model_filename: model filepath
+
+    Returns:
+
+    &#34;&#34;&#34;
+
+    with open(model_filename, &#39;wb&#39;) as out:
+        pickle.dump(self.ntagger.model, out)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.start_server"><code class="name flex">
+<span>def <span class="ident">start_server</span></span>(<span>self, port=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Start the ner tagging server</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>port</code></strong></dt>
+<dd>Port number to bind the server to.</dd>
+</dl>
+<p>Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def start_server(self, port=None):
+    &#34;&#34;&#34;
+    Start the ner tagging server
+    Args:
+        port: Port number to bind the server to.
+
+    Returns:
+
+    &#34;&#34;&#34;
+    if port:
+        self.app.run(port)
+    else:
+        self.app.run(port=5050)</code></pre>
+</details>
+</dd>
+<dt id="NERD.NER.NerTagger.update_model"><code class="name flex">
+<span>def <span class="ident">update_model</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Updates the model
+Returns:</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update_model(self):
+    &#34;&#34;&#34;
+    Updates the model
+    Returns:
+
+    &#34;&#34;&#34;
+
+    self.ntagger.update_model()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="NERD" href="index.html">NERD</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="NERD.NER.BaseNerTagger" href="#NERD.NER.BaseNerTagger">BaseNerTagger</a></code></h4>
+<ul class="">
+<li><code><a title="NERD.NER.BaseNerTagger.add_unlabelled_examples" href="#NERD.NER.BaseNerTagger.add_unlabelled_examples">add_unlabelled_examples</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.get_new_random_example" href="#NERD.NER.BaseNerTagger.get_new_random_example">get_new_random_example</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.get_new_random_predicted_example" href="#NERD.NER.BaseNerTagger.get_new_random_predicted_example">get_new_random_predicted_example</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.load_data" href="#NERD.NER.BaseNerTagger.load_data">load_data</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.query_new_example" href="#NERD.NER.BaseNerTagger.query_new_example">query_new_example</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.save_data" href="#NERD.NER.BaseNerTagger.save_data">save_data</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.save_example" href="#NERD.NER.BaseNerTagger.save_example">save_example</a></code></li>
+<li><code><a title="NERD.NER.BaseNerTagger.update_model" href="#NERD.NER.BaseNerTagger.update_model">update_model</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="NERD.NER.NerTagger" href="#NERD.NER.NerTagger">NerTagger</a></code></h4>
+<ul class="">
+<li><code><a title="NERD.NER.NerTagger.add_unlabelled_examples" href="#NERD.NER.NerTagger.add_unlabelled_examples">add_unlabelled_examples</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.find_entities_in_text" href="#NERD.NER.NerTagger.find_entities_in_text">find_entities_in_text</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.load_labelled_examples" href="#NERD.NER.NerTagger.load_labelled_examples">load_labelled_examples</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.load_model" href="#NERD.NER.NerTagger.load_model">load_model</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.save_labelled_examples" href="#NERD.NER.NerTagger.save_labelled_examples">save_labelled_examples</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.save_model" href="#NERD.NER.NerTagger.save_model">save_model</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.start_server" href="#NERD.NER.NerTagger.start_server">start_server</a></code></li>
+<li><code><a title="NERD.NER.NerTagger.update_model" href="#NERD.NER.NerTagger.update_model">update_model</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

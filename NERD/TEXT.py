@@ -21,78 +21,6 @@ from nltk import pos_tag, word_tokenize
 import unicodedata
 
 
-def get_nth_token(text, n):
-    """
-    Splits text into tokens and returns the nth token
-    Args:
-        text: text string
-        n: 0 indexed token to return
-
-    Returns:
-
-    """
-    toks = re.findall('[\w+\(\),:;\[\]]+', text)
-    if len(toks) > n:
-        return toks[n]
-    else:
-        return ''
-
-
-def cleanup_string(text):
-    """
-    Basic text Sanitization
-    Args:
-        text: text to cleanup
-
-    Returns:
-
-    """
-    toret = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
-    toret = toret.strip()
-    toret = re.sub('[\r\n\t]+', ' ', toret)
-    # toks = re.findall('[\w+\(\),:;\[\]]+', toret)
-    # toret = ' '.join(toks)
-    toret = re.sub('[^\w+\(\),:;\[\]\-.|& \t\n/]+', ' ', toret)
-
-    return toret
-
-
-def get_pos_string(text, text_len=100):
-    if len(text) < text_len:
-        tags = pos_tag(word_tokenize(text))
-        tags = [t[1] for t in tags]
-        return ' '.join(tags)
-    else:
-        return ''
-
-
-def is_alpha_and_numeric(string):
-    toret = ''
-    if string.isdigit():
-        toret = 'DIGIT'
-    elif string.isalpha():
-        if string.isupper():
-            toret = 'ALPHA_UPPER'
-        elif string.islower():
-            toret = 'ALPHA_LOWER'
-        else:
-            toret = 'ALPHA'
-    elif len(string) > 0:
-        toks = [string[0], string[-1]]
-        alphanum = 0
-        for tok in toks:
-            if tok.isdigit():
-                alphanum += 1
-            elif tok.isalpha():
-                alphanum -= 1
-        if alphanum == 0:
-            toret = 'ALPHA_NUM'
-    else:
-        toret = 'EMPTY'
-
-    return toret
-
-
 class ColumnsSelector(TransformerMixin):
     def __init__(self, cols):
         self.cols = cols
@@ -134,10 +62,82 @@ class DefaultTextFeaturizer(TransformerMixin):
     def fit(self, X, y=None):
         return self
 
+    @staticmethod
+    def _get_nth_token(text, n):
+        """
+        Splits text into tokens and returns the nth token
+        Args:
+            text: text string
+            n: 0 indexed token to return
+
+        Returns:
+
+        """
+        toks = re.findall('[\w+\(\),:;\[\]]+', text)
+        if len(toks) > n:
+            return toks[n]
+        else:
+            return ''
+
+    @staticmethod
+    def _cleanup_string(text):
+        """
+        Basic text Sanitization
+        Args:
+            text: text to cleanup
+
+        Returns:
+
+        """
+        toret = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+        toret = toret.strip()
+        toret = re.sub('[\r\n\t]+', ' ', toret)
+        # toks = re.findall('[\w+\(\),:;\[\]]+', toret)
+        # toret = ' '.join(toks)
+        toret = re.sub('[^\w+\(\),:;\[\]\-.|& \t\n/]+', ' ', toret)
+
+        return toret
+
+    @staticmethod
+    def _get_pos_string(text, text_len=100):
+        if len(text) < text_len:
+            tags = pos_tag(word_tokenize(text))
+            tags = [t[1] for t in tags]
+            return ' '.join(tags)
+        else:
+            return ''
+
+    @staticmethod
+    def _is_alpha_and_numeric(string):
+        toret = ''
+        if string.isdigit():
+            toret = 'DIGIT'
+        elif string.isalpha():
+            if string.isupper():
+                toret = 'ALPHA_UPPER'
+            elif string.islower():
+                toret = 'ALPHA_LOWER'
+            else:
+                toret = 'ALPHA'
+        elif len(string) > 0:
+            toks = [string[0], string[-1]]
+            alphanum = 0
+            for tok in toks:
+                if tok.isdigit():
+                    alphanum += 1
+                elif tok.isalpha():
+                    alphanum -= 1
+            if alphanum == 0:
+                toret = 'ALPHA_NUM'
+        else:
+            toret = 'EMPTY'
+
+        return toret
+
     def transform(self, X):
         data = pd.DataFrame(data={'text': X})
-        data.text = data.text.apply(lambda x: cleanup_string(x))
-        data["pos_string"] = data.text.apply(lambda x: get_pos_string(x))
+        data.text = data.text.apply(lambda x: DefaultTextFeaturizer._cleanup_string(x))
+        data["pos_string"] = data.text.apply(lambda x: DefaultTextFeaturizer._get_pos_string(x))
         data['text_feature_text_length'] = data['text'].apply(lambda x: len(x))
         data['text_feature_capitals'] = data['text'].apply(lambda comment: sum(1 for c in comment if c.isupper()))
         data['text_feature_digits'] = data['text'].apply(lambda comment: sum(1 for c in comment if c.isdigit()))
@@ -149,9 +149,12 @@ class DefaultTextFeaturizer(TransformerMixin):
         data['text_feature_words_vs_unique'] = data['text_feature_num_unique_words'] / (
                 data['text_feature_num_words'] + 0.001)
 
-        data['text_feature_first_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 0)))
-        data['text_feature_second_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 1)))
-        data['text_feature_third_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 2)))
+        data['text_feature_first_token'] = data['text'].apply(
+            lambda x: DefaultTextFeaturizer._is_alpha_and_numeric(DefaultTextFeaturizer._get_nth_token(x, 0)))
+        data['text_feature_second_token'] = data['text'].apply(
+            lambda x: DefaultTextFeaturizer._is_alpha_and_numeric(DefaultTextFeaturizer._get_nth_token(x, 1)))
+        data['text_feature_third_token'] = data['text'].apply(
+            lambda x: DefaultTextFeaturizer._is_alpha_and_numeric(DefaultTextFeaturizer._get_nth_token(x, 2)))
 
         data['text_feature_title_word_count'] = data['text'].apply(lambda x: sum(1 for c in x.split() if c.istitle()))
         data['text_feature_title_word_total_word_ratio'] = data['text_feature_title_word_count'] / (
@@ -328,8 +331,11 @@ class BaseTextClassifier:
     def add_unlabelled_examples(self, examples):
         """
         Append more unlabelled data to dataset
-        :param examples: List of strings
-        :return:
+        Args:
+            examples: List of strings
+
+        Returns:
+
         """
         new_examples = pd.DataFrame(data={'text': examples})
         self.all_data = pd.concat([self.all_data, new_examples])
@@ -341,95 +347,95 @@ list_of_colors = "#e6194B, #3cb44b, #ffe119, #4363d8, #f58231, #911eb4, #42d4f4,
 list_of_colors = list_of_colors.split(', ')
 
 
-def render_app_template(unique_tags_data):
-    """
-    Tag data in the form
-    [
-        (tag_id, readable_tag_name)
-    ]
-    :param unique_tags_data:
-    :return: html template to render
-    """
-
-    if len(unique_tags_data) > len(list_of_colors):
-        return "Too many tags. Add more colors to list_of_colors"
-
-    trainer_path = os.path.join(os.path.dirname(__file__), 'html_templates',
-                                'text_classifier.html')
-    with open(trainer_path) as templ:
-        template = Template(templ.read())
-
-    css_classes = []
-    for index, item in enumerate(unique_tags_data):
-        css_classes.append((item[0], list_of_colors[index]))
-
-    return template.render(css_classes=css_classes, id_color_map=css_classes, tag_controls=unique_tags_data)
-
-
-def get_app(tagger, tags):
-    app = Flask(__name__)
-
-    @app.route("/")
-    def base_app():
-        return render_app_template(tags)
-
-    @app.route('/load_example')
-    def load_example():
-        if tagger.model is None:
-            example = tagger.get_new_random_example()
-        else:
-            example = tagger.query_new_example(mode='entropy')
-
-        # print(f'Returning example ::: {example[:100]}')
-
-        return example
-
-    @app.route('/update_model')
-    def update_model():
-        tagger.update_model()
-        return "Model Updated Successfully"
-
-    @app.route('/save_example', methods=['POST'])
-    def save_example():
-        form_data = request.form
-        tag = form_data['tag']
-        tagger.save_example(tag)
-        return 'Success'
-
-    @app.route('/save_data')
-    def save_tagged_data():
-        print("save_tagged_data")
-        tagger.save_data()
-        return 'Data Saved'
-
-    return app
-
-
 class TextClassifier:
     def __init__(self, dataset, unique_tags, data_directory=''):
         """
-        need unique tag, tag tiles
-        EX:
-        tags= [
-            ("CT", "Course Title"),
-            ("CC", "Course Code"),
-            ("PREQ", "Pre-requisites"),
-            ("PROF", "Professor"),
-            ("SE", "Season"),
-            ("CR", "Credits")
-        ]
-        :param unique_tags:
+        Text Classifier from dataset and unique tags
+        Args:
+            dataset: list of strings
+            unique_tags: list of tuples [(identifier, Readable Name)..]
+            data_directory: Default data directory
         """
         self.unique_tags = unique_tags
         self.tagger = BaseTextClassifier(dataset, data_directory=data_directory)
-        self.app = get_app(self.tagger, self.unique_tags)
+        self.app = TextClassifier._get_app(self.tagger, self.unique_tags)
         self.utmapping = {t[0]: t[1] for t in self.unique_tags}
+
+    @staticmethod
+    def _render_app_template(unique_tags_data):
+        """
+        Tag data in the form
+        [
+            (tag_id, readable_tag_name)
+        ]
+        Args:
+            unique_tags_data: list of tag tuples
+
+        Returns: html to render
+
+        """
+
+        if len(unique_tags_data) > len(list_of_colors):
+            return "Too many tags. Add more colors to list_of_colors"
+
+        trainer_path = os.path.join(os.path.dirname(__file__), 'html_templates',
+                                    'text_classifier.html')
+        with open(trainer_path) as templ:
+            template = Template(templ.read())
+
+        css_classes = []
+        for index, item in enumerate(unique_tags_data):
+            css_classes.append((item[0], list_of_colors[index]))
+
+        return template.render(css_classes=css_classes, id_color_map=css_classes, tag_controls=unique_tags_data)
+
+    @staticmethod
+    def _get_app(tagger, tags):
+        app = Flask(__name__)
+
+        @app.route("/")
+        def base_app():
+            return TextClassifier._render_app_template(tags)
+
+        @app.route('/load_example')
+        def load_example():
+            if tagger.model is None:
+                example = tagger.get_new_random_example()
+            else:
+                example = tagger.query_new_example(mode='entropy')
+
+            # print(f'Returning example ::: {example[:100]}')
+
+            return example
+
+        @app.route('/update_model')
+        def update_model():
+            tagger.update_model()
+            return "Model Updated Successfully"
+
+        @app.route('/save_example', methods=['POST'])
+        def save_example():
+            form_data = request.form
+            tag = form_data['tag']
+            tagger.save_example(tag)
+            return 'Success'
+
+        @app.route('/save_data')
+        def save_tagged_data():
+            print("save_tagged_data")
+            tagger.save_data()
+            return 'Data Saved'
+
+        return app
 
     def start_server(self, port=None):
         """
-        Start the ner tagging server
-        :param port: Port number to bind the server to.
-        :return:
+        Start text classification server at the given port.
+        Args:
+            port: Port number to bind the server to.
+
+        Returns:
+
         """
         if port:
             self.app.run(port)
@@ -439,32 +445,44 @@ class TextClassifier:
     def add_unlabelled_examples(self, examples):
         """
         Append unlabelled examples to dataset
-        :param examples: list of strings
-        :return:
+        Args:
+            examples: list of strings
+
+        Returns:
+
         """
         self.tagger.add_unlabelled_examples(examples)
 
     def save_labelled_examples(self, filepath):
         """
         Save labelled examples to file
-        :param filepath: destination filename
-        :return:
+        Args:
+            filepath: destination filename
+
+        Returns:
+
         """
         self.tagger.save_data(filepath)
 
     def load_labelled_examples(self, filepath):
         """
         Load labelled examples to the dataset
-        :param filepath: source filename
-        :return:
+        Args:
+            filepath: source filename
+
+        Returns:
+
         """
         self.tagger.load_data(filepath)
 
     def save_model(self, model_filename):
         """
         Save classifier model to file
-        :param model_filename: destination filename
-        :return:
+        Args:
+            model_filename: destination filename
+
+        Returns:
+
         """
         with open(model_filename, 'wb') as out:
             pickle.dump(self.tagger.model, out)
@@ -472,8 +490,11 @@ class TextClassifier:
     def load_model(self, model_filename):
         """
         Load classifier model from file
-        :param model_filename: source filename
-        :return:
+        Args:
+            model_filename: source filename
+
+        Returns:
+
         """
         with open(model_filename, 'rb') as inp:
             self.tagger.model = pickle.load(inp)
@@ -481,7 +502,8 @@ class TextClassifier:
     def update_model(self):
         """
         Updates the model
-        :return:
+        Returns:
+
         """
         self.tagger.update_model()
 
