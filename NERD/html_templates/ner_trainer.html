@@ -39,9 +39,11 @@
 		#tag_controls span{
 			padding: 5px;
 			color: white;
-			font-size: 20px;
+			font-size: 16px;
 			font-family: courier;
 			user-select: none;
+			display: inline-block;
+			margin-top: 3px;
 		}
 
 		#container span{
@@ -123,6 +125,7 @@
 			for(var i=0; i<spans.length; i++){
 				if(sel.containsNode(spans[i])){
 					span = $(spans[i])
+					console.log(span)
 					span.removeAttr('data-tag-id data-tag class')
 
 				}
@@ -130,9 +133,6 @@
 
 			sel.empty()
 		}
-
-
-
 
 
 		function generate_ner_html_from_tokens(tokens){
@@ -277,7 +277,7 @@
 		</div>
 		<br>
 		<br>
-		<div id="container">			
+		<div id="container">
 		</div>
 	</div>
 	

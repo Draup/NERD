@@ -25,7 +25,7 @@
 		#NER{
 			width: 900px;
 			margin: auto;
-			text-align: center;
+
 		}
 
 		#container{
@@ -34,14 +34,28 @@
 			padding: 5px;
 			font-family: courier;
 			font-size: 18px;
+			white-space: break-spaces;
+			text-align: left;
+		}
+
+		#tag_controls{
+			text-align: center;
 		}
 
 		#tag_controls span{
 			padding: 5px;
-			color: white;
-			font-size: 20px;
+			color: black;
+			font-size: 16px;
 			font-family: courier;
 			user-select: none;
+			border: 2px solid black;
+			display: inline-block;
+			margin-top: 2px;
+		}
+
+		#tag_controls span.selected{
+			background: black;
+			color: white;
 		}
 
 		#container span{
@@ -51,53 +65,38 @@
 			border-bottom: 1px solid;
 		}
 
-		{% for cls in css_classes %}
-		.{{cls[0]}} {
-			background: {{cls[1]}};
-			color: white;
-		}
-		{% endfor %}
-
+		
 
 
 	</style>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script type="text/javascript">
-		id_color_map = {
-			{% for cls in css_classes%}
-				'{{cls[0]}}': '{{cls[1]}}',
-			{% endfor %}
-		}
-
 		
+		ui_data = {{ui_data}}
 
 		window.onload = function(){
 
-			
+
+			is_multilabel = ui_data['multilabel']
 
 			container = $('#container')
 
 			// decorating the tag controls
 			all_ner_tag_controls = $('#tag_controls span')
-			for(var sp=0; sp<all_ner_tag_controls.length; sp++){
-			  spn = $(all_ner_tag_controls[sp])
-			  id = spn.prop('id')
-			  color = id_color_map[id]
-			  spn.css('background', color)
-			}
+			
 
 
 
 			all_ner_tag_controls.click(function(){
 				curr = $(this)
-				curr_tag_id = curr.prop('id')
-				$.post("/save_example",
-                    {
-                        tag: curr_tag_id
-                    },
-                    function(data, status){
-                        container.html('')
-                    });  
+				if(is_multilabel){
+					curr.toggleClass('selected')
+				}else{
+					sel = $('#tag_controls span.selected')
+					sel.removeClass('selected')
+					curr.addClass('selected')
+				}
+				
 
 			})
 			ex = "this is a random string that doesn't make sense"
@@ -109,16 +108,52 @@
 			update_model_button = $('#update_model')
 			save_example_button = $('#save_example')
 			save_data_button = $('#save_data')
-			
+
+			CURRENT_EXAMPLE_INDEX = null
 			load_example_button.click(function(){
                     $.get('/load_example', function(data, status){
                         if(status == 'success'){
-                            // container.html(generate_ner_html_from_tokens(data))
-                            container.html(data)
-                            CURR_EXAMPLE_TAG_ID = 100
+							CURRENT_EXAMPLE_INDEX = data['example_index']
+							if(data.hasOwnProperty('predictions')){
+								current_predictions = data['predictions']
+								for(var sp=0; sp<all_ner_tag_controls.length; sp++){
+								  spn = $(all_ner_tag_controls[sp])
+								  id = spn.prop('id')
+								  if(current_predictions.includes(id)){
+								  	spn.addClass('selected')
+								  }
+								}
+
+
+							}
+							
+                            container.html(data['view'])
+
                         }
                     })
                 })
+
+
+			save_example_button.click(function(){
+				tags = []
+				sel = $('#tag_controls span.selected')
+				for(var i=0; i<sel.length; i++){
+					tag = $(sel[i])
+				  	tags.push(tag.attr('id'))
+				  	tag.removeClass('selected')
+				}
+
+				$.post("/save_example", {
+					example_index: CURRENT_EXAMPLE_INDEX,
+					tag: JSON.stringify(tags)
+				},
+				function(data, status){
+					container.html('')
+					CURRENT_EXAMPLE_INDEX = null
+				})
+				
+				
+			})
 
 
 			update_model_button.click(function(){
@@ -143,23 +178,23 @@
 <body>
 	<div id="main_controls">
 		<span id="load_example">Load Example</span>
+		<span id="save_example">Save Example</span>
 		<span id="update_model">Update Model</span>
 		<span id="save_data">Save Data</span>
 	</div>
 	<br>
 	<br>
-	<div id="NER">
-		<div id='tag_controls'>
-			{%for item in tag_controls%}
-			<span id="{{item[0]}}">{{item[1]}}</span>
-			{% endfor %}
-			<!-- {{tag_controls}} -->
+	<div id='tag_controls'>
+		{%for item in tag_controls%}
+		<span id="{{item[0]}}">{{item[1]}}</span>
+		{% endfor %}
+		<!-- {{tag_controls}} -->
 
-		</div>
+	</div>
+	<div id="NER">
 		<br>
-		<br>
-		<div id="container">
-		</div>
+		<pre id="container">
+		</pre>
 	</div>
 
 </body>
