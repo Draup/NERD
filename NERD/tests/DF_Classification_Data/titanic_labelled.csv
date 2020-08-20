@@ -1,0 +1,159 @@
+,Survived,Pclass,Name,Sex,Age,Siblings/Spouses Aboard,Parents/Children Aboard,Fare,class
+0,0,3,Mr. Owen Harris Braund,male,22.0,1,0,7.25,Dead
+2,1,3,Miss. Laina Heikkinen,female,26.0,0,0,7.925,ALIVE
+8,1,3,Mrs. Oscar W (Elisabeth Vilhelmina Berg) Johnson,female,27.0,0,2,11.1333,ALIVE
+10,1,3,Miss. Marguerite Rut Sandstrom,female,4.0,1,1,16.7,ALIVE
+16,0,3,Master. Eugene Rice,male,2.0,4,1,29.125,Dead
+17,1,2,Mr. Charles Eugene Williams,male,23.0,0,0,13.0,ALIVE
+20,0,2,Mr. Joseph J Fynney,male,35.0,0,0,26.0,Dead
+21,1,2,Mr. Lawrence Beesley,male,34.0,0,0,13.0,ALIVE
+24,0,3,Miss. Torborg Danira Palsson,female,8.0,3,1,21.075,Dead
+26,0,3,Mr. Farred Chehab Emir,male,26.0,0,0,7.225,Dead
+27,0,1,Mr. Charles Alexander Fortune,male,19.0,3,2,263.0,Dead
+28,1,3,Miss. Ellen O'Dwyer,female,24.0,0,0,7.8792,ALIVE
+30,0,1,Don. Manuel E Uruchurtu,male,40.0,0,0,27.7208,Dead
+34,0,1,Mr. Edgar Joseph Meyer,male,28.0,1,0,82.1708,Dead
+37,0,3,Mr. Ernest Charles Cann,male,21.0,0,0,8.05,Dead
+38,0,3,Miss. Augusta Maria Vander Planke,female,18.0,2,0,18.0,Dead
+39,1,3,Miss. Jamila Nicola-Yarred,female,14.0,1,0,11.2417,ALIVE
+42,1,2,Miss. Simonne Marie Anne Andree Laroche,female,3.0,1,2,41.5792,ALIVE
+47,0,3,Mr. Youssef Samaan,male,16.0,2,0,21.6792,Dead
+48,0,3,Mrs. Josef (Josefine Franchi) Arnold-Franchi,female,18.0,1,0,17.8,Dead
+51,1,1,Mrs. Henry Sleeper (Myna Haxtun) Harper,female,49.0,1,0,76.7292,ALIVE
+58,0,3,Master. William Frederick Goodwin,male,11.0,5,2,46.9,Dead
+63,0,1,Mr. Albert A Stewart,male,64.0,0,0,27.7208,Dead
+64,1,3,Master. Gerios Moubarek,male,7.0,1,1,15.2458,ALIVE
+67,1,3,Miss. Erna Alexandra Andersson,female,17.0,4,2,7.925,ALIVE
+70,0,3,Miss. Lillian Amy Goodwin,female,16.0,5,2,46.9,Dead
+72,0,3,Mr. Apostolos Chronopoulos,male,26.0,1,0,14.4542,Dead
+74,0,3,Mr. Sigurd Hansen Moen,male,25.0,0,0,7.65,Dead
+77,1,2,Master. Alden Gates Caldwell,male,0.83,0,2,29.0,ALIVE
+78,1,3,Miss. Elizabeth Dowdell,female,30.0,0,0,12.475,ALIVE
+81,1,3,Miss. Brigdet Delia McDermott,female,31.0,0,0,7.7875,ALIVE
+84,1,3,Mrs. Karl Alfred (Maria Mathilda Gustafsson) Backstrom,female,33.0,3,0,15.85,ALIVE
+88,0,3,Mr. Francesco Celotti,male,24.0,0,0,8.05,Dead
+92,0,3,Mr. Bertram Frank Dean,male,26.0,1,2,20.575,Dead
+96,1,1,Mr. William Bertram Greenfield,male,23.0,0,1,63.3583,ALIVE
+97,1,2,Mrs. John T (Ada Julia Bone) Doling,female,34.0,0,1,23.0,ALIVE
+110,0,3,Miss. Hileni Zabour,female,14.5,1,0,14.4542,Dead
+112,0,3,Miss. Katriina Jussila,female,20.0,1,0,9.825,Dead
+113,0,3,Miss. Malake Attalah,female,17.0,0,0,14.4583,Dead
+116,0,2,Mr. William John Robert Turpin,male,29.0,1,0,21.0,Dead
+117,0,1,Mr. Quigg Edmond Baxter,male,24.0,0,1,247.5208,Dead
+118,0,3,Miss. Ellis Anna Maria Andersson,female,2.0,4,2,31.275,Dead
+124,1,3,Master. Elias Nicola-Yarred,male,12.0,1,0,11.2417,ALIVE
+126,1,3,Mr. Fridtjof Arne Madsen,male,24.0,0,0,7.1417,ALIVE
+134,0,2,Mr. Emile Richard,male,23.0,0,0,15.0458,Dead
+135,1,1,Miss. Helen Monypeny Newsom,female,19.0,0,2,26.2833,ALIVE
+144,0,2,Mr. Joseph Charles Nicholls,male,19.0,1,1,36.75,Dead
+146,0,3,Miss. Robina Maggie Ford,female,9.0,2,2,34.375,Dead
+147,0,2,Mr. Michel Navratil,male,36.5,0,2,26.0,Dead
+148,0,2,Rev. Thomas Roussel Davids Byles,male,42.0,0,0,13.0,Dead
+152,0,3,Mr. Austin Blyler van Billiard,male,40.5,0,2,14.5,Dead
+154,0,1,Mr. Charles Duane Williams,male,51.0,0,1,61.3792,Dead
+164,1,3,Master. Frank John William Goldsmith,male,9.0,0,2,20.525,ALIVE
+165,1,1,Mrs. (Edith Martha Bowerman) Chibnall,female,48.0,0,1,55.0,ALIVE
+167,0,1,Mr. John D Baumann,male,60.0,0,0,25.925,Dead
+169,0,1,Mr. Wyckoff Van der hoef,male,61.0,0,0,33.5,Dead
+173,0,1,Mr. James Clinch Smith,male,56.0,0,0,30.6958,Dead
+174,0,3,Mr. Klas Albin Klasen,male,18.0,1,1,7.8542,Dead
+175,0,3,Master. Henry Forbes Lefebre,male,5.0,3,1,25.4667,Dead
+179,0,3,Miss. Constance Gladys Sage,female,8.0,8,2,69.55,Dead
+183,1,3,Miss. Luise Gretchen Kink-Heilmann,female,4.0,0,2,22.025,ALIVE
+187,0,3,Mr. John Bourke,male,40.0,1,1,15.5,Dead
+190,0,2,Mr. William Carbines,male,19.0,0,0,13.0,Dead
+192,1,2,Master. Michel M Navratil,male,3.0,1,1,26.0,ALIVE
+194,1,1,Miss. Elise Lurette,female,58.0,0,0,146.5208,ALIVE
+208,1,1,Mr. Henry Blank,male,40.0,0,0,31.0,ALIVE
+209,0,3,Mr. Ahmed Ali,male,24.0,0,0,7.05,Dead
+220,0,2,Mr. James H Bracken,male,27.0,0,0,13.0,Dead
+223,1,1,Mr. Frederick Maxfield Hoyt,male,38.0,1,0,90.0,ALIVE
+227,0,2,Mr. Arne Jonas Fahlstrom,male,18.0,0,0,13.0,Dead
+228,0,3,Miss. Mathilde Lefebre,female,12.0,3,1,25.4667,Dead
+239,0,3,Miss. Thamine Zabour,female,19.0,1,0,14.4542,Dead
+240,1,3,Miss. Katherine Murphy,female,18.0,1,0,15.5,ALIVE
+246,1,2,Mrs. William (Anna) Hamalainen,female,24.0,0,2,14.5,ALIVE
+247,1,1,Mr. Richard Leonard Beckwith,male,37.0,1,1,52.5542,ALIVE
+254,1,3,Mrs. Darwis (Hanne Youssef Razi) Touma,female,29.0,0,2,15.2458,ALIVE
+271,0,1,Mr. Charles H Natsch,male,37.0,0,1,29.7,Dead
+272,1,3,Miss. Hanora Healy,female,33.0,0,0,7.75,ALIVE
+277,1,3,Mrs. Stanton (Rosa Hunt) Abbott,female,35.0,1,1,20.25,ALIVE
+280,0,3,Mr. Alfons de Pelsmaeker,male,16.0,0,0,9.5,Dead
+290,0,2,Mr. Rene Jacques Levy,male,36.0,0,0,12.875,Dead
+299,1,3,Mr. Bernard McCoy,male,24.0,2,0,23.25,ALIVE
+308,1,1,Miss. Margaret Bechstein Hays,female,24.0,0,0,83.1583,ALIVE
+309,1,1,Miss. Emily Borie Ryerson,female,18.0,2,2,262.375,ALIVE
+311,0,3,Mr. Ignjac Hendekovic,male,28.0,0,0,7.8958,Dead
+314,1,2,Mrs. Sinai (Miriam Sternin) Kantor,female,24.0,1,0,26.0,ALIVE
+319,0,3,Mr. Yoto Danoff,male,27.0,0,0,7.8958,Dead
+324,0,3,Mr. Johan Hansen Nysveen,male,61.0,0,0,6.2375,Dead
+325,1,2,Mrs. (Ada E Hall) Ball,female,36.0,0,0,13.0,ALIVE
+330,0,1,Mr. George Edward Graham,male,38.0,0,1,153.4625,Dead
+340,0,2,Mr. Erik Gustaf Collander,male,28.0,0,0,13.0,Dead
+342,0,2,Mr. Stanley Hubert Fox,male,36.0,0,0,13.0,Dead
+344,1,2,Miss. Marion Elsie Smith,female,40.0,0,0,13.0,ALIVE
+362,0,3,Mr. Thomas O'Brien,male,27.0,1,0,15.5,Dead
+370,0,3,Mr. William Thomas Beavan,male,19.0,0,0,8.05,Dead
+372,0,3,Miss. Stina Viola Palsson,female,3.0,3,1,21.075,Dead
+375,0,1,Mr. Harry Elkins Widener,male,27.0,0,2,211.5,Dead
+382,0,3,Mr. Vasil Plotcharsky,male,27.0,0,0,7.8958,Dead
+385,1,2,Miss. Kate Buss,female,36.0,0,0,13.0,ALIVE
+387,1,2,Miss. Bertha Lehmann,female,17.0,0,0,12.0,ALIVE
+394,0,3,Miss. Elina Olsson,female,31.0,0,0,7.8542,Dead
+409,0,3,Mr. Henry Hart,male,27.0,0,0,6.8583,Dead
+421,0,3,Mr. Viktor Richard Rosblom,male,18.0,1,1,20.2125,Dead
+430,0,3,Mr. Nikolai Erland Kallio,male,17.0,0,0,7.125,Dead
+451,0,3,Mr. Joseph Peduzzi,male,24.0,0,0,8.05,Dead
+464,0,1,Mr. John Montgomery Smart,male,56.0,0,0,26.55,Dead
+466,1,3,Miss. Helene Barbara Baclini,female,0.75,2,1,19.2583,ALIVE
+469,1,2,Mrs. Edwy Arthur (Ada Mary Worth) West,female,33.0,1,2,27.75,ALIVE
+486,1,3,Master. Eden Leslie Coutts,male,9.0,1,1,15.9,ALIVE
+492,0,3,Mr. Gerious Yousseff,male,26.0,0,0,14.4583,Dead
+500,0,3,Miss. Kristina Sofia Laitinen,female,37.0,0,0,9.5875,Dead
+504,1,1,Mr. George Bradley,male,37.0,0,0,26.55,ALIVE
+520,1,1,Mrs. Louis Albert (Ida Sophia Fischer) Hippach,female,44.0,0,1,57.9792,ALIVE
+526,0,2,Mr. Richard George Hocking,male,23.0,2,1,11.5,Dead
+527,1,2,Miss. Phyllis May Quick,female,2.0,1,1,26.0,ALIVE
+562,0,3,Mr. Alfred J Davies,male,24.0,2,0,24.15,Dead
+564,0,3,Mrs. Nils (Alma Cornelia Berglund) Palsson,female,29.0,0,4,21.075,Dead
+565,0,3,Mr. Tannous Doharr,male,28.0,0,0,7.2292,Dead
+568,1,1,Mrs. Edward Dale (Charlotte Lamson) Appleton,female,53.0,2,0,51.4792,ALIVE
+572,0,3,Mr. George Patchett,male,19.0,0,0,14.5,Dead
+575,0,3,Mrs. Joseph (Maria Elias) Caram,female,18.0,1,0,14.4583,Dead
+578,1,1,Mrs. John Borland (Marian Longstreth Morris) Thayer,female,39.0,1,1,110.8833,ALIVE
+587,0,3,Mr. Matti Rintamaki,male,35.0,0,0,7.125,Dead
+595,0,3,Mr. Hanna Boulos,male,18.0,0,0,7.225,Dead
+603,0,3,Mr. Milan Karaic,male,30.0,0,0,7.8958,Dead
+605,1,2,Mrs. Joseph (Juliette Marie Louise Lafargue) Laroche,female,22.0,1,2,41.5792,ALIVE
+619,1,3,Mr. Sahid Nakid,male,20.0,1,1,15.7417,ALIVE
+621,0,3,Mr. David John Bowen,male,21.0,0,0,16.1,Dead
+641,1,3,Miss. Eugenie Baclini,female,0.75,2,1,19.2583,ALIVE
+645,0,3,Mr. Edward Willey,male,21.0,0,0,7.55,Dead
+647,0,3,Mr. Mito Mitkoff,male,23.0,0,0,7.8958,Dead
+649,0,3,Mr. Johannes Halvorsen Kalvik,male,21.0,0,0,8.4333,Dead
+656,0,1,Mr. Arthur Webster Newell,male,58.0,0,2,113.275,Dead
+673,0,3,Mr. Frederick Charles Sawyer,male,24.5,0,0,8.05,Dead
+690,0,3,Mr. Khalil Saad,male,25.0,0,0,7.225,Dead
+697,1,1,Mrs. John Jacob (Madeleine Talmadge Force) Astor,female,18.0,1,0,227.525,ALIVE
+701,0,3,Mr. Henrik Juul Hansen,male,26.0,1,0,7.8542,Dead
+705,1,1,Miss. Alice Cleaver,female,22.0,0,0,151.55,ALIVE
+710,0,3,Mr. August Viktor Larsson,male,29.0,0,0,9.4833,Dead
+720,1,1,Mr. Norman Campbell Chambers,male,27.0,1,0,53.1,ALIVE
+725,0,3,Miss. Pieta Sofia Ilmakangas,female,25.0,1,0,7.925,Dead
+737,0,1,Mr. Tyrell William Cavendish,male,36.0,1,0,78.85,Dead
+739,0,3,Mr. Neal McNamee,male,24.0,1,0,16.1,Dead
+743,1,2,Miss. Anna Sinkkonen,female,30.0,0,0,13.0,ALIVE
+764,0,3,Mr. Daniel J Moran,male,28.0,1,0,24.15,Dead
+766,0,3,Mr. Rene Aime Lievens,male,24.0,0,0,9.5,Dead
+775,1,1,Mrs. Edward Scott (Elisabeth Walton McMillan) Robert,female,43.0,0,1,211.3375,ALIVE
+779,0,3,Mr. Andrew G Johnston,male,35.0,1,2,23.45,Dead
+793,1,3,Mrs. Mara Osman,female,31.0,0,0,8.6833,ALIVE
+809,0,3,Miss. Ebba Iris Alfrida Andersson,female,6.0,4,2,31.275,Dead
+810,0,3,Mr. Ernest Portage Tomlin,male,30.5,0,0,8.05,Dead
+816,1,1,Mrs. Charles Melville (Clara Jennings Gregg) Hays,female,52.0,1,1,93.5,ALIVE
+822,0,3,Mr. Len Lam,male,23.0,0,0,56.4958,Dead
+823,1,2,Master. Andre Mallet,male,1.0,0,2,37.0042,ALIVE
+827,1,2,Master. George Sibley Richards,male,0.83,1,1,18.75,ALIVE
+839,0,3,Mr. Peter L Lemberopolous,male,34.5,0,0,6.4375,Dead
+840,0,3,Mr. Jeso Culumovic,male,17.0,0,0,8.6625,Dead
+848,0,3,Miss. Nourelain Boulos,female,9.0,1,1,15.2458,Dead

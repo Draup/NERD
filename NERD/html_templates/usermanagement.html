@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Add this to <head> -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!-- Load required Bootstrap and BootstrapVue CSS -->
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+
+
+
+    <!-- Load Vue followed by BootstrapVue -->
+    <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+
+    <!-- Load the following for BootstrapVueIcons support -->
+    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+    <div id='myapp'>
+        <b-container class="col-md-5 py-5">
+            <b-tabs justified>
+                <b-tab title='Login'>
+                    <b-container class="h-100">
+                        <div id='myform'>
+                            <b-form @submit="onSubmit('login', $event)" @reset="onReset('login', $event)" v-if="show">
+                                <br>
+                                <h3>Email address</h3>
+                                <b-form-input v-model="form.login.email" type="email" required
+                                    placeholder="Enter email"></b-form-input>
+
+                                <br>
+                                <h3>Password</h3>
+                                <b-form-input v-model="form.login.password" type="password" required
+                                    placeholder="Enter your password"></b-form-input>
+                                <br>
+                                <b-button type="submit" variant="primary">Login</b-button>
+                                <b-button type="reset" variant="danger">Reset</b-button>
+                            </b-form>
+                            </b-card>
+                        </div>
+                    </b-container>
+                </b-tab>
+                <b-tab title='Register'>
+
+                    <b-container>
+                        <div id='myform'>
+                            <b-form @submit="onSubmit('register', $event)" @reset="onReset('register', $event)" v-if="show">
+                                <br>
+                                <h3>Enter Email</h3>
+                                <b-form-input v-model="form.register.email" type="email" required placeholder="Enter email">
+                                </b-form-input>
+
+                                <br>
+                                <h3>Enter Password</h3>
+                                <b-form-input v-model="form.register.password" type="password" required
+                                    placeholder="Enter your password"></b-form-input>
+                                <br>
+                                <h3>Confirm Password</h3>
+                                <b-form-input v-model="form.register.confirm" type="text" required
+                                    placeholder="Confirm your password"></b-form-input>
+                                
+                                <br>
+                                <b-button type="submit" variant="primary"
+                                    :disabled="register_submit_disabled">
+                                    Register
+                                </b-button>
+                                <b-button type="reset" variant="danger">Reset</b-button>
+                            </b-form>
+                            </b-card>
+                        </div>
+
+                    </b-container>
+
+                </b-tab>
+            </b-tabs>
+        </b-container>
+
+    </div>
+
+
+    <script>
+        let myapp = new Vue({
+            el: '#myapp',
+            data: {
+                form: {
+                    login: {
+                        email: '',
+                        password: '',
+                    },
+                    register: {
+                        email: '',
+                        password: '',
+                        confirm: ''
+                    }
+                    
+                },
+                show: true
+            },
+            computed: {
+                register_submit_disabled: function(){
+                    if(this.form.register.password.length > 0){
+                        return this.form.register.password !== this.form.register.confirm
+                    }
+                    else{
+                        return true
+                    }
+                }
+            },
+            methods: {
+                onSubmit(type, evt) {
+                    evt.preventDefault()
+                    appcontext = this
+                    if(type == 'login'){
+                        axios.post('/login', {
+                            'username': this.form.login.email,
+                            'password': this.form.login.password
+                        }).then(function (response) {
+                            data = response.data;
+                            if (data.redirect) {
+                                // data.redirect contains the string URL to redirect to
+                                window.location.href = data.redirect;
+                            } else if(data.error){
+                                console.log(data)
+                                appcontext.$bvToast.toast(data.error, {
+                                    title: 'Alert!',
+                                    autoHideDelay: 3000,
+                                })
+                            }
+
+                        })
+                    }else if(type == 'register'){
+                        axios.post('/register', {
+                            'username': this.form.register.email,
+                            'password': this.form.register.password
+                        }).then(function (response) {
+                            data = response.data;
+                            if (data.redirect) {
+                                // data.redirect contains the string URL to redirect to
+                                window.location.href = data.redirect;
+                            } else if(data.error){
+                                console.log(data)
+                                appcontext.$bvToast.toast(data.error, {
+                                    title: 'Alert!',
+                                    autoHideDelay: 3000,
+                                })
+                            }
+                        })
+
+                    }
+                    
+                },
+                onReset(type, evt) {
+                    evt.preventDefault()
+                    // Reset our form values
+                    if(type == 'login'){
+                        this.form.login.email = ''
+                        this.form.login.password = ''
+                    }else if(type == 'register'){
+                        for(let k in this.form.register){
+                            this.form.register[k] = ''
+                        }
+                    }
+                    
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

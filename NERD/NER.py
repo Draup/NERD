@@ -175,7 +175,8 @@ class BaseNerTagger:
         if unlabelled is None:
             self.unlabelled = None
         else:
-            self.unlabelled = [{'raw': get_pos_tagged_example(text)} for text in unlabelled]
+            self.unlabelled = [
+                {'raw': get_pos_tagged_example(text)} for text in unlabelled]
         if labelled is None:
             labelled = []
         self.labelled = labelled
@@ -222,7 +223,8 @@ class BaseNerTagger:
                 example['features'] = sent2features(example['raw'])
             X.append(example['features'])
         preds = self.model.predict_marginals(X)
-        uncertainities = [get_prediction_uncertainity(pred, mode) for pred in preds]
+        uncertainities = [get_prediction_uncertainity(
+            pred, mode) for pred in preds]
         index = np.argmax(uncertainities)
         self.current_example_index = sample[index]
         self.current_example = self.unlabelled[self.current_example_index]
@@ -276,7 +278,8 @@ class BaseNerTagger:
         :return:
         """
         if filepath is None:
-            filepath = os.path.join(self.data_directory, 'ner_tagged_data.pickle')
+            filepath = os.path.join(
+                self.data_directory, 'ner_tagged_data.pickle')
         with open(filepath, 'wb') as out:
             pickle.dump(self.labelled, out)
 
@@ -297,7 +300,8 @@ class BaseNerTagger:
         :param examples: List of strings
         :return:
         """
-        new_examples = [{'raw': get_pos_tagged_example(text)} for text in examples]
+        new_examples = [
+            {'raw': get_pos_tagged_example(text)} for text in examples]
         self.unlabelled.extend(new_examples)
 
 
@@ -394,7 +398,8 @@ def render_app_template(unique_tags_data):
     if len(unique_tags_data) > len(list_of_colors):
         return "Too many tags. Add more colors to list_of_colors"
 
-    trainer_path = os.path.join(os.path.dirname(__file__), 'html_templates', 'ner_trainer.html')
+    trainer_path = os.path.join(os.path.dirname(
+        __file__), 'html_templates', 'ner_trainer.html')
     with open(trainer_path) as templ:
         template = Template(templ.read())
 
@@ -451,7 +456,12 @@ def get_pos_tagged_example(text):
 
 
 class NerTagger:
-    def __init__(self, dataset, unique_tags, data_directory=''):
+    def __init__(self,
+                 dataset,
+                 unique_tags,
+                 data_directory='',
+                 multiuser=False
+                 ):
         """
         need unique tag, tag tiles
         EX:
@@ -526,7 +536,6 @@ class NerTagger:
         :return:
         """
         self.ntagger.update_model()
-
 
     def find_entities_in_text(self, text):
         text = get_pos_tagged_example(text)

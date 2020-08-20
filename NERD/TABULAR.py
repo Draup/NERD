@@ -4,6 +4,7 @@ import pickle
 import os
 from flask import Flask
 from flask import request
+from flask import session
 from jinja2 import Template
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
@@ -11,7 +12,7 @@ import random
 import json
 
 from sklearn.pipeline import Pipeline
-
+from .nerdlogin import LoginRequired
 
 class BaseDataFrameClassifier:
     """
@@ -23,6 +24,7 @@ class BaseDataFrameClassifier:
                  data,
                  featurization_pipeline=None,
                  label_col='class',
+                 user_col="NERD_USER",
                  multilabel=False,
                  data_directory='',
                  display_function=None,
@@ -40,8 +42,11 @@ class BaseDataFrameClassifier:
         self.display_function = display_function
         self.all_data = data
         self.label_col = label_col
-        if self.label_col not in self.all_data.columns:
-            self.all_data[self.label_col] = np.nan
+        self.user_col = user_col
+        self.info_cols = [self.label_col, self.user_col]
+        for col in self.info_cols:
+            if col not in self.all_data.columns:
+                self.all_data[col] = np.nan
 
         self.featurization_pipeline = featurization_pipeline
         self.model = None
@@ -60,16 +65,16 @@ class BaseDataFrameClassifier:
         Returns a random example to be tagged. Used to bootstrap the model.
         Returns:
         """
-        unl = self.all_data[self.all_data['class'].isna()].index
+        unl = self.all_data[self.all_data[self.label_col].isna()].index
         current_example_index = np.random.choice(unl)
-        current_example = self.all_data.iloc[current_example_index]
+        current_example = self.all_data.loc[current_example_index]
 
         toret = {
             'example_index': int(current_example_index),
             'view': self.generate_view(current_example)
         }
         if self.model:
-            preds = self.model.predict(self.all_data.iloc[current_example_index: current_example_index + 1])
+            preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index + 1])
             if self.multilabel:
                 preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
                 toret['predictions'] = preds
@@ -90,7 +95,7 @@ class BaseDataFrameClassifier:
         """
         if mode == 'entropy':
             THRESH = BaseDataFrameClassifier.SAMPLE_THRESH
-            unlab = self.all_data[self.all_data['class'].isna()]
+            unlab = self.all_data[self.all_data[self.label_col].isna()]
 
             if len(unlab) > THRESH:
                 unlab = unlab.sample(THRESH)
@@ -100,12 +105,12 @@ class BaseDataFrameClassifier:
             actual_idx = unlabelled_idx[proba_idx]
 
             current_example_index = actual_idx
-            current_example = self.all_data.iloc[current_example_index]
+            current_example = self.all_data.loc[current_example_index]
 
 
         elif mode == 'top2diff':
             THRESH = BaseDataFrameClassifier.SAMPLE_THRESH
-            unlab = self.all_data[self.all_data['class'].isna()]
+            unlab = self.all_data[self.all_data[self.label_col].isna()]
 
             #             unlab = self.all_data
             if len(unlab) > THRESH:
@@ -117,14 +122,14 @@ class BaseDataFrameClassifier:
             actual_idx = unlabelled_idx[proba_idx]
 
             current_example_index = actual_idx
-            current_example = self.all_data.iloc[current_example_index]
+            current_example = self.all_data.loc[current_example_index]
 
         toret = {
             'example_index': int(current_example_index),
             'view': self.generate_view(current_example)
         }
         if self.model:
-            preds = self.model.predict(self.all_data.iloc[current_example_index: current_example_index + 1])
+            preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index + 1])
             if self.multilabel:
                 preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
                 toret['predictions'] = preds
@@ -148,7 +153,7 @@ class BaseDataFrameClassifier:
         lab = self.all_data[self.all_data[self.label_col].notna()]
         self.model.fit(lab, lab[self.label_col])
 
-    def save_example(self, example_index, data):
+    def save_example(self, example_index, data, username=None):
         """
         Saves the current example with the user tagged data
         :param data: User tagged data. [list of tags]
@@ -157,6 +162,7 @@ class BaseDataFrameClassifier:
 
         print(data)
         self.all_data.loc[example_index, self.label_col] = '; '.join(data)
+        self.all_data.loc[example_index, self.user_col] = username
 
     def save_data(self, filepath=None):
         """
@@ -185,7 +191,9 @@ class DataFrameClassifier:
                  multilabel=False,
                  featurization_pipeline=None,
                  display_function=None,
-                 data_directory=''):
+                 data_directory='',
+                 usermanagement=False
+                 ):
         """
         Text Classifier from dataset and unique tags
         Args:
@@ -194,6 +202,7 @@ class DataFrameClassifier:
             data_directory: Default data directory
         """
         self.unique_tags = unique_tags
+        self.usermanagement = usermanagement
         self.utmapping = {t[0]: t[1] for t in self.unique_tags}
         self.tagger = BaseDataFrameClassifier(dataset,
                                               label_col=label_col,
@@ -205,7 +214,16 @@ class DataFrameClassifier:
         self.ui_data = {
             'multilabel': multilabel
         }
-        self.app = get_app(self.tagger, self.unique_tags, self.ui_data)
+        self.app = get_app(self, self.unique_tags, self.ui_data)
+        
+        if usermanagement:
+            if data_directory == '':
+                usersjson = './nerdusers.json'
+            else:
+                usersjson = f'./{data_directory}/nerdusers.json'
+            
+            print(usersjson)
+            self.um = LoginRequired(self.app, usersjson=usersjson)
 
     def start_server(self, host=None, port=None):
         """
@@ -294,8 +312,10 @@ def render_app_template(unique_tags_data, ui_data):
     return template.render(tag_controls=unique_tags_data, ui_data=json.dumps(ui_data))
 
 
-def get_app(tagger, tags, ui_data):
+def get_app(dfc, tags, ui_data):
+    tagger = dfc.tagger
     app = Flask(__name__)
+    print(dfc.usermanagement)
 
     @app.route("/")
     def base_app():
@@ -306,8 +326,11 @@ def get_app(tagger, tags, ui_data):
         if tagger.model is None:
             example = tagger.get_new_random_example()
         else:
-            if random.random() < 0.5:
+            randint = random.random()
+            if randint < 0.33:
                 example = tagger.query_new_example(mode='entropy')
+            elif randint < 0.67:
+                example = tagger.query_new_example(mode='top2diff')
             else:
                 example = tagger.get_new_random_example()
 
@@ -326,7 +349,8 @@ def get_app(tagger, tags, ui_data):
         tag = form_data['tag']
         tag = json.loads(tag)
         example_index = int(form_data['example_index'])
-        tagger.save_example(example_index, tag)
+        username = session.get('username', None)
+        tagger.save_example(example_index, tag, username=username)
         return 'Success'
 
     @app.route('/save_data')

@@ -208,7 +208,7 @@ class BaseTextClassifier:
         self.text_col = text_col
         self.multilabel = multilabel
         if self.label_col not in self.all_data:
-            self.all_data['class'] = np.nan
+            self.all_data[self.label_col] = np.nan
 
         # extra feature functions
         if feature_transformer is 'default':
@@ -251,16 +251,16 @@ class BaseTextClassifier:
         Returns a random example to be tagged. Used to bootstrap the model.
         :return:
         """
-        unl = self.all_data[self.all_data['class'].isna()].index
+        unl = self.all_data[self.all_data[self.label_col].isna()].index
         current_example_index = np.random.choice(unl)
-        current_example = self.all_data.iloc[current_example_index]
+        current_example = self.all_data.loc[current_example_index]
 
         toret = {
             'example_index': int(current_example_index),
             'view': self.generate_view(current_example)
         }
         if self.model:
-            preds = self.model.predict(self.all_data.iloc[current_example_index: current_example_index+1])
+            preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index+1])
             if self.multilabel:
                 preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
                 toret['predictions'] = preds
@@ -295,13 +295,13 @@ class BaseTextClassifier:
 
             actual_idx = unlabelled_idx[proba_idx]
             current_example_index = actual_idx
-            current_example = self.all_data.iloc[current_example_index]
+            current_example = self.all_data.loc[current_example_index]
             toret = {
                 'example_index': int(current_example_index),
                 'view': self.generate_view(current_example)
             }
             if self.model:
-                preds = self.model.predict(self.all_data.iloc[current_example_index: current_example_index+1])
+                preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index+1])
                 if self.multilabel:
                     preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
                     toret['predictions'] = preds
