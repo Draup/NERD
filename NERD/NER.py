@@ -173,39 +173,64 @@ class BaseNerTagger:
         :param labelled: list of {list of tuples [(token, pos_tag, tag), ...]}
         """
         if unlabelled is None:
-            self.unlabelled = None
+            unlabelled = []
         else:
-            self.unlabelled = [
+            unlabelled = [
                 {'raw': get_pos_tagged_example(text)} for text in unlabelled]
         if labelled is None:
             labelled = []
-        self.labelled = labelled
+
+        self.dataset = []
+        for ex in unlabelled:
+            self.dataset.append({
+                'status': 'UNLABELLED',
+                'data': ex
+            })
+
+        for ex in labelled:
+            self.dataset.append({
+                'status': 'LABELLED',
+                'data': ex
+            })
+
         self.model = None
 
         self.data_directory = os.path.join(data_directory, 'NER_Data')
         os.makedirs(self.data_directory, exist_ok=True)
+
+    def get_unlabelled_indices(self):
+        return [index for index, ex in enumerate(self.dataset) if ex['status'] == 'UNLABELLED']
 
     def get_new_random_example(self):
         """
         Returns a random example to be tagged. Used to bootstrap the model.
         :return:
         """
-        self.current_example_index = random.randint(0, len(self.unlabelled))
-        self.current_example = self.unlabelled[self.current_example_index]
-        return self.current_example['raw']
+        unlabelled_set = self.get_unlabelled_indices()
+        current_example_index = random.choice(unlabelled_set)
+        current_example = self.dataset[current_example_index]['data']
+        toret = current_example['raw']
+        return {
+            'example_id': current_example_index,
+            'example': toret
+        }
 
     def get_new_random_predicted_example(self):
         """
         Returns a random example tagged by the currently tagged model.
         :return:
         """
-        self.current_example_index = random.randint(0, len(self.unlabelled))
-        self.current_example = self.unlabelled[self.current_example_index]
-        raw = self.current_example['raw']
+        unlabelled_set = self.get_unlabelled_indices()
+        current_example_index = random.choice(unlabelled_set)
+        current_example = self.dataset[current_example_index]['data']
+        raw = current_example['raw']
         features = sent2features(raw)
         preds = self.model.predict_single(features)
         toret = add_prediction_to_postagged_data(raw, preds)
-        return toret
+        return {
+            'example_id': current_example_index,
+            'example': toret
+        }
 
     def query_new_example(self, mode='max'):
         """
@@ -215,10 +240,11 @@ class BaseNerTagger:
             - mean
         :return:
         """
-        sample = np.random.randint(0, len(self.unlabelled), size=250).tolist()
+        unlabelled_set = self.get_unlabelled_indices()
+        sample = random.choices(unlabelled_set, k=250)
         X = []
         for s in sample:
-            example = self.unlabelled[s]
+            example = self.dataset[s]['data']
             if 'features' not in example:
                 example['features'] = sent2features(example['raw'])
             X.append(example['features'])
@@ -226,13 +252,16 @@ class BaseNerTagger:
         uncertainities = [get_prediction_uncertainity(
             pred, mode) for pred in preds]
         index = np.argmax(uncertainities)
-        self.current_example_index = sample[index]
-        self.current_example = self.unlabelled[self.current_example_index]
-        raw = self.current_example['raw']
-        features = self.current_example['features']
+        current_example_index = sample[index]
+        current_example = self.dataset[current_example_index]['data']
+        raw = current_example['raw']
+        features = current_example['features']
         preds = self.model.predict_single(features)
         toret = add_prediction_to_postagged_data(raw, preds)
-        return toret
+        return {
+            'example_id': current_example_index,
+            'example': toret
+        }
 
     def update_model(self):
         """
@@ -247,29 +276,33 @@ class BaseNerTagger:
                 max_iterations=100,
                 all_possible_transitions=True
             )
-        X = [item['features'] for item in self.labelled]
-        Y = [sent2labels(item['raw']) for item in self.labelled]
+
+        labelled = [item['data'] for item in self.dataset if item['status'] == 'LABELLED']
+        X = [item['features'] for item in labelled]
+        Y = [sent2labels(item['raw']) for item in labelled]
         self.model.fit(X, Y)
 
-    def save_example(self, data):
+    def save_example(self, example_id, data):
         """
         Saves the current example with the user tagged data
         :param data: User tagged data. [list of tags]
         :return:
         """
-        if len(data) != len(self.current_example['raw']):
+
+        current_example = self.dataset[example_id]['data']
+
+        if len(data) != len(current_example['raw']):
             return False
         else:
             toret = []
             for index in range(len(data)):
                 toret.append(
-                    (self.current_example['raw'][index][0], self.current_example['raw'][index][1], data[index][1]))
+                    (current_example['raw'][index][0], current_example['raw'][index][1], data[index][1]))
 
-            example = self.current_example
+            example = current_example
             example['raw'] = toret
             example['features'] = sent2features(toret)
-            self.labelled.append(example)
-            self.unlabelled.pop(self.current_example_index)
+            self.dataset[example_id]['status'] = 'LABELLED'
 
     def save_data(self, filepath=None):
         """
@@ -424,8 +457,10 @@ def get_app(ntagger, tags):
         else:
             example = ntagger.query_new_example(mode='max')
 
-        html = generate_html_from_example(example)
-        return html
+        return {
+            'example_id': example['example_id'],
+            'example_html': generate_html_from_example(example['example'])
+        }
 
     @app.route('/update_model')
     def update_model():
@@ -436,8 +471,9 @@ def get_app(ntagger, tags):
     def save_example():
         form_data = request.form
         html = form_data['html']
+        example_id = int(form_data['example_id'])
         user_tags = get_bilou_tags_from_html(html)
-        ntagger.save_example(user_tags)
+        ntagger.save_example(example_id, user_tags)
         return 'Success'
 
     @app.route('/save_data')

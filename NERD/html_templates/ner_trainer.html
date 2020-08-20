@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>NER Trainer</title>
-	<style type="text/css">
+    <title>NER Trainer</title>
+    <style type="text/css">
 
 		#main_controls{
 			width: 900px;
@@ -63,8 +63,8 @@
 		
 
 	</style>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script type="text/javascript">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript">
 		id_color_map = {
 			{% for cls in css_classes%}
 				'{{cls[0]}}': '{{cls[1]}}',
@@ -212,11 +212,14 @@
 			save_data_button = $('#save_data')
 			clear_tags_button = $('#clear_tags')
 
+            EXAMPLE_ID = null
 			load_example_button.click(function(){
                     $.get('/load_example', function(data, status){
                         if(status == 'success'){
                             // container.html(generate_ner_html_from_tokens(data))
-                            container.html(data)
+                            EXAMPLE_ID = data['example_id']
+                            html = data['example_html']
+                            container.html(html)
                             CURR_EXAMPLE_TAG_ID = 100
                         }
                     })
@@ -225,6 +228,7 @@
 			save_example_button.click(function(){
 				$.post("/save_example",
                     {
+                        example_id: EXAMPLE_ID,
                         html: container.html()
                     },
                     function(data, status){
@@ -258,28 +262,28 @@
 	</script>
 </head>
 <body>
-	<div id="main_controls">
-		<span id="load_example">Load Example</span>
-		<span id="update_model">Update Model</span>
-		<span id="save_example">Save Example</span>
-		<span id="save_data">Save Data</span>
-		<span id='clear_tags'>Clear Tags</span>
-	</div>
-	<br>
-	<br>
-	<div id="NER">
-		<div id='tag_controls'>
-			{%for item in tag_controls%}
-			<span id="{{item[0]}}">{{item[1]}}</span>
-			{% endfor %}
-			<!-- {{tag_controls}} -->
-			
-		</div>
-		<br>
-		<br>
-		<div id="container">
-		</div>
-	</div>
-	
+<div id="main_controls">
+    <span id="load_example">Load Example</span>
+    <span id="update_model">Update Model</span>
+    <span id="save_example">Save Example</span>
+    <span id="save_data">Save Data</span>
+    <span id='clear_tags'>Clear Tags</span>
+</div>
+<br>
+<br>
+<div id="NER">
+    <div id='tag_controls'>
+        {%for item in tag_controls%}
+        <span id="{{item[0]}}">{{item[1]}}</span>
+        {% endfor %}
+        <!-- {{tag_controls}} -->
+
+    </div>
+    <br>
+    <br>
+    <div id="container">
+    </div>
+</div>
+
 </body>
 </html>
