@@ -314,7 +314,7 @@ class BaseNerTagger:
             filepath = os.path.join(
                 self.data_directory, 'ner_tagged_data.pickle')
         with open(filepath, 'wb') as out:
-            pickle.dump(self.labelled, out)
+            pickle.dump(self.dataset, out)
 
     def load_data(self, filepath=None):
         """
