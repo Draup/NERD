@@ -343,11 +343,13 @@ def get_app(dfc, tags, ui_data):
         tagger.update_model()
         return "Model Updated Successfully"
 
-    @app.route('/save_example', methods=['POST'])
+    @app.route('/save_example', methods=['GET'])
     def save_example():
-        form_data = request.form
+        print(request)
+        data = request.args.get('payload')
+        form_data = json.loads(data)
+        print(form_data)
         tag = form_data['tag']
-        tag = json.loads(tag)
         example_index = int(form_data['example_index'])
         username = session.get('username', None)
         tagger.save_example(example_index, tag, username=username)

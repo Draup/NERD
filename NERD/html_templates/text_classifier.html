@@ -110,8 +110,9 @@
 			save_data_button = $('#save_data')
 
 			CURRENT_EXAMPLE_INDEX = null
+            BASE_URL = document.location.href
 			load_example_button.click(function(){
-                    $.get('/load_example', function(data, status){
+                    $.get(BASE_URL + '/load_example', function(data, status){
                         if(status == 'success'){
 							CURRENT_EXAMPLE_INDEX = data['example_index']
 							if(data.hasOwnProperty('predictions')){
@@ -145,10 +146,10 @@
 				  	tag.removeClass('selected')
 				}
 
-				$.post("/save_example", {
+				$.get(BASE_URL + "/save_example", {payload: JSON.stringify({
 					example_index: CURRENT_EXAMPLE_INDEX,
-					tag: JSON.stringify(tags)
-				},
+					tag: tags
+				})},
 				function(data, status){
 					container.html('')
 					CURRENT_EXAMPLE_INDEX = null
@@ -159,7 +160,7 @@
 
 
 			update_model_button.click(function(){
-				$.get('/update_model', function(data, status){
+				$.get(BASE_URL + '/update_model', function(data, status){
                     if(status == 'success'){
                         console.log(data)
                     }
@@ -167,7 +168,7 @@
 			})
 
 			save_data_button.click(function(){
-				$.get('/save_data', function(data, status){
+				$.get(BASE_URL + '/save_data', function(data, status){
                     if(status == 'success'){
                         console.log(data)
                     }
