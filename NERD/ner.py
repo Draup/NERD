@@ -20,6 +20,12 @@ from jinja2 import Template
 import pandas as pd
 
 
+def get_sentences(text):
+    sents = text.split('\n')
+    sents = [s.strip() for s in sents if len(s.strip()) > 0]
+    return sents
+
+
 def is_alpha_and_numeric(string):
     toret = ''
     if string.isdigit():
@@ -277,7 +283,8 @@ class BaseNerTagger:
                 all_possible_transitions=True
             )
 
-        labelled = [item['data'] for item in self.dataset if item['status'] == 'LABELLED']
+        labelled = [item['data']
+                    for item in self.dataset if item['status'] == 'LABELLED']
         X = [item['features'] for item in labelled]
         Y = [sent2labels(item['raw']) for item in labelled]
         self.model.fit(X, Y)
@@ -348,12 +355,12 @@ def get_bilou_tags_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
     toret = []
 
-    tag_items = soup.find_all('span', attrs={'data-tag': True})
+    tag_items = soup.find_all(['span', 'br'], attrs={'data-tag': True})
     #     return tag_items
     tag_ids = [item.attrs['data-tag-id'] for item in tag_items]
     counter = Counter(tag_ids)
 
-    items = soup.find_all('span')
+    items = soup.find_all(['span', 'br'])
     max_items = len(items)
     index = 0
     while index < max_items:
@@ -387,8 +394,12 @@ def generate_html_from_example(ex):
     if type(ex) == type({}):
         ex = ex['raw']
     for item in ex:
-        tag = Tag(name='span')
-        tag.insert(0, item[0])
+        if item[0] == '\n':
+            tag = Tag(name='br', can_be_empty_element=True)
+        else:
+            tag = Tag(name='span')
+            tag.insert(0, item[0])
+
         spans.append(tag)
 
     if len(ex[0]) == 3:
@@ -432,7 +443,7 @@ def render_app_template(unique_tags_data):
         return "Too many tags. Add more colors to list_of_colors"
 
     trainer_path = os.path.join(os.path.dirname(
-        __file__), 'html_templates', 'ner_trainer.html')
+        __file__), 'html_templates', 'ner_trainer.html.j2')
     with open(trainer_path) as templ:
         template = Template(templ.read())
 
@@ -486,7 +497,14 @@ def get_app(ntagger, tags):
 
 
 def get_pos_tagged_example(text):
-    tokens = word_tokenize(text)
+    sents = get_sentences(text)
+    tokens = []
+    for index, sent in enumerate(sents):
+        if index > 0 and index < len(sents) - 1:
+            tokens.append('\n')
+
+        tokens.extend(word_tokenize(sent))
+    # tokens = word_tokenize(text)
     toret = pos_tag(tokens)
     return toret
 

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>NER Trainer</title>
+	<style type="text/css">
+		#main_controls {
+			width: 900px;
+			margin: auto;
+			text-align: center;
+			margin-top: 50px;
+		}
+
+		#main_controls span {
+			user-select: none;
+			background: rgb(21, 34, 55);
+			color: white;
+			padding: 5px;
+			font-size: 18px;
+			font-family: sans-serif;
+			border: 2px solid black;
+			border-radius: 5px;
+			/* 			float: center; */
+		}
+
+		#NER {
+			width: 900px;
+			margin: auto;
+			text-align: center;
+		}
+
+		#container {
+			border: 1px solid black;
+			min-height: 200px;
+			padding: 5px;
+			font-family: courier;
+			font-size: 18px;
+			text-align: left;
+    		padding-left: 20px;
+		}
+
+		#tag_controls span {
+			padding: 5px;
+			color: white;
+			font-size: 16px;
+			font-family: courier;
+			user-select: none;
+			display: inline-block;
+			margin-top: 3px;
+		}
+
+		#container span {
+			display: inline-block;
+			padding: 3px;
+			margin: 1px 4px;
+			border-bottom: 1px solid;
+		}
+
+		{% for cls in css_classes %}
+		.{{cls[0]}} {
+			background: {{cls[1]}};
+			color: white;
+		}
+		{% endfor %}
+	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		id_color_map = {
+			{% for cls in css_classes%}
+				'{{cls[0]}}': '{{cls[1]}}',
+			{% endfor %}
+		}
+
+		function tag_words(tag, tag_id) {
+			console.log(tag)
+			var sel = document.getSelection()
+			console.log(sel)
+			spans = $('#container span, #container br')
+
+			nodes = [sel.anchorNode, sel.focusNode]
+			for (var i = 0; i < nodes.length; i++) {
+				par = $(nodes[i]).parent()
+				if (par.prop('tagName') == "SPAN") {
+
+					par.attr({
+						'data-tag-id': tag_id,
+						'data-tag': tag,
+						'class': tag
+					})
+				}
+			}
+
+			for (var i = 0; i < spans.length; i++) {
+				if (sel.containsNode(spans[i])) {
+					span = $(spans[i])
+
+
+					span.attr({
+						'data-tag-id': tag_id,
+						'data-tag': tag,
+						'class': tag
+					})
+
+				}
+			}
+
+			sel.empty()
+		}
+
+
+		function clear_tagged_spans() {
+			var sel = document.getSelection()
+			console.log(sel)
+			spans = $('#container span')
+
+
+			nodes = [sel.anchorNode, sel.focusNode]
+			for (var i = 0; i < nodes.length; i++) {
+				par = $(nodes[i]).parent()
+				if (par.prop('tagName') == "SPAN") {
+					par.removeAttr('data-tag-id data-tag class')
+				}
+			}
+
+			for (var i = 0; i < spans.length; i++) {
+				if (sel.containsNode(spans[i])) {
+					span = $(spans[i])
+					console.log(span)
+					span.removeAttr('data-tag-id data-tag class')
+
+				}
+			}
+
+			sel.empty()
+		}
+
+
+		function generate_ner_html_from_tokens(tokens) {
+			toret = ''
+
+			for (var tok in tokens) {
+				toret += "<span>" + tokens[tok] + "</span>"
+			}
+			console.log(toret)
+			return toret
+		}
+
+		window.onload = function () {
+
+			CURR_EXAMPLE_TAG_ID = 100
+
+			function refresh_data_tag_id() {
+				spans = $('#container span')
+				curr_tag_id = undefined
+				for (var i = spans.length - 1; i >= 0; i--) {
+					span = $(spans[i])
+					this_tag_id = span.attr('data-tag-id')
+					console.log(this_tag_id)
+					if (this_tag_id != undefined) {
+						if (this_tag_id != curr_tag_id) {
+							CURR_EXAMPLE_TAG_ID += 1
+							curr_tag_id = this_tag_id
+							span.attr('data-tag-id', CURR_EXAMPLE_TAG_ID)
+						} else {
+							span.attr('data-tag-id', CURR_EXAMPLE_TAG_ID)
+						}
+					} else {
+						curr_tag_id = undefined
+					}
+				}
+
+			}
+
+			container = $('#container')
+
+			// decorating the tag controls
+			all_ner_tag_controls = $('#tag_controls span')
+			for (var sp = 0; sp < all_ner_tag_controls.length; sp++) {
+				spn = $(all_ner_tag_controls[sp])
+				id = spn.prop('id')
+				color = id_color_map[id]
+				spn.css('background', color)
+			}
+
+
+
+			all_ner_tag_controls.click(function () {
+				curr = $(this)
+				curr_tag_id = curr.prop('id')
+				// curr_color = id_color_map[curr_tag_id]
+				CURR_EXAMPLE_TAG_ID += 1
+				tag_words(curr_tag_id, CURR_EXAMPLE_TAG_ID)
+
+			})
+			ex = "this is a random string that doesn't make sense"
+			ex = ex.split(' ')
+			container.html(generate_ner_html_from_tokens(ex))
+
+			// listener to remove tag
+			container.on('click', 'span', function () {
+				item = $(this)
+
+				item.removeAttr('data-tag-id data-tag class')
+				refresh_data_tag_id()
+			})
+
+
+			// main_controls
+			load_example_button = $('#load_example')
+			update_model_button = $('#update_model')
+			save_example_button = $('#save_example')
+			save_data_button = $('#save_data')
+			clear_tags_button = $('#clear_tags')
+
+			EXAMPLE_ID = null
+			load_example_button.click(function () {
+				$.get('/load_example', function (data, status) {
+					if (status == 'success') {
+						// container.html(generate_ner_html_from_tokens(data))
+						EXAMPLE_ID = data['example_id']
+						html = data['example_html']
+						container.html(html)
+						CURR_EXAMPLE_TAG_ID = 100
+					}
+				})
+			})
+
+			save_example_button.click(function () {
+				$.post("/save_example",
+					{
+						example_id: EXAMPLE_ID,
+						html: container.html()
+					},
+					function (data, status) {
+						container.html('')
+					});
+			})
+
+			update_model_button.click(function () {
+				$.get('/update_model', function (data, status) {
+					if (status == 'success') {
+						console.log(data)
+					}
+				})
+			})
+
+			save_data_button.click(function () {
+				$.get('/save_data', function (data, status) {
+					if (status == 'success') {
+						console.log(data)
+					}
+				})
+			})
+
+
+			clear_tags_button.click(function () {
+				clear_tagged_spans()
+				refresh_data_tag_id()
+			})
+
+		}
+	</script>
+</head>
+
+<body>
+	<div id="main_controls">
+		<span id="load_example">Load Example</span>
+		<span id="update_model">Update Model</span>
+		<span id="save_example">Save Example</span>
+		<span id="save_data">Save Data</span>
+		<span id='clear_tags'>Clear Tags</span>
+	</div>
+	<br>
+	<br>
+	<div id="NER">
+		<div id='tag_controls'>
+			{%for item in tag_controls%}
+			<span id="{{item[0]}}">{{item[1]}}</span>
+			{% endfor %}
+		</div>
+		<br>
+		<br>
+		<div id="container">
+		</div>
+	</div>
+
+</body>
+
+</html>

@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Active Learning Text Classifier</title>
 	<style type="text/css">
-
-		#main_controls{
+		#main_controls {
 			width: 900px;
 			margin: auto;
 			text-align: center;
 			margin-top: 50px;
 		}
 
-		#main_controls span{
+		#main_controls span {
 			user-select: none;
 			background: rgb(21, 34, 55);
 			color: white;
@@ -20,15 +20,16 @@
 			font-family: sans-serif;
 			border: 2px solid black;
 			border-radius: 5px;
-/* 			float: center; */
+			/* 			float: center; */
 		}
-		#NER{
+
+		#NER {
 			width: 900px;
 			margin: auto;
 
 		}
 
-		#container{
+		#container {
 			border: 1px solid black;
 			min-height: 200px;
 			padding: 5px;
@@ -38,11 +39,11 @@
 			text-align: left;
 		}
 
-		#tag_controls{
+		#tag_controls {
 			text-align: center;
 		}
 
-		#tag_controls span{
+		#tag_controls span {
 			padding: 5px;
 			color: black;
 			font-size: 16px;
@@ -53,28 +54,24 @@
 			margin-top: 2px;
 		}
 
-		#tag_controls span.selected{
+		#tag_controls span.selected {
 			background: black;
 			color: white;
 		}
 
-		#container span{
-		 	display: inline-block;
+		#container span {
+			display: inline-block;
 			padding: 3px;
-			margin:1px 4px;
+			margin: 1px 4px;
 			border-bottom: 1px solid;
 		}
-
-		
-
-
 	</style>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script type="text/javascript">
-		
-		ui_data = {{ui_data}}
 
-		window.onload = function(){
+		ui_data = {{ ui_data }}
+
+		window.onload = function () {
 
 
 			is_multilabel = ui_data['multilabel']
@@ -83,26 +80,26 @@
 
 			// decorating the tag controls
 			all_ner_tag_controls = $('#tag_controls span')
-			
 
 
 
-			all_ner_tag_controls.click(function(){
+
+			all_ner_tag_controls.click(function () {
 				curr = $(this)
-				if(is_multilabel){
+				if (is_multilabel) {
 					curr.toggleClass('selected')
-				}else{
+				} else {
 					sel = $('#tag_controls span.selected')
 					sel.removeClass('selected')
 					curr.addClass('selected')
 				}
-				
+
 
 			})
 			ex = "this is a random string that doesn't make sense"
 			container.html(ex)
 
-			
+
 			// main_controls
 			load_example_button = $('#load_example')
 			update_model_button = $('#update_model')
@@ -110,74 +107,82 @@
 			save_data_button = $('#save_data')
 
 			CURRENT_EXAMPLE_INDEX = null
-            BASE_URL = document.location.href
-			load_example_button.click(function(){
-                    $.get(BASE_URL + '/load_example', function(data, status){
-                        if(status == 'success'){
-							CURRENT_EXAMPLE_INDEX = data['example_index']
-							if(data.hasOwnProperty('predictions')){
-								current_predictions = data['predictions']
-								for(var sp=0; sp<all_ner_tag_controls.length; sp++){
-								  spn = $(all_ner_tag_controls[sp])
-								  id = spn.prop('id')
-								  if(current_predictions.includes(id)){
-								  	spn.addClass('selected')
-								  }else{
-								  	spn.removeClass('selected')
-								  }
+			BASE_URL = document.location.href
+			load_example_button.click(function () {
+				$.get(BASE_URL + 'load_example', function (data, status) {
+					if (status == 'success') {
+						CURRENT_EXAMPLE_INDEX = data['example_index']
+						if (data.hasOwnProperty('predictions')) {
+							current_predictions = data['predictions']
+							for (var sp = 0; sp < all_ner_tag_controls.length; sp++) {
+								spn = $(all_ner_tag_controls[sp])
+								id = spn.prop('id')
+								if (current_predictions.includes(id)) {
+									spn.addClass('selected')
+								} else {
+									spn.removeClass('selected')
 								}
-
-
 							}
-							
-                            container.html(data['view'])
-
-                        }
-                    })
-                })
 
 
-			save_example_button.click(function(){
+						}
+
+						container.html(data['view'])
+
+					}
+				})
+			})
+
+
+			save_example_button.click(function () {
 				tags = []
 				sel = $('#tag_controls span.selected')
-				for(var i=0; i<sel.length; i++){
+				for (var i = 0; i < sel.length; i++) {
 					tag = $(sel[i])
-				  	tags.push(tag.attr('id'))
-				  	tag.removeClass('selected')
+					tags.push(tag.attr('id'))
+					tag.removeClass('selected')
 				}
 
-				$.get(BASE_URL + "/save_example", {payload: JSON.stringify({
+				tagged_data = {
 					example_index: CURRENT_EXAMPLE_INDEX,
 					tag: tags
-				})},
-				function(data, status){
-					container.html('')
-					CURRENT_EXAMPLE_INDEX = null
+				};
+				console.log(tagged_data);
+
+				tagged_data = {
+					payload: JSON.stringify(tagged_data)
+				}
+
+				$.post(BASE_URL + "save_example", tagged_data,
+					function (data, status) {
+						container.html('')
+						CURRENT_EXAMPLE_INDEX = null
+					})
+
+
+			})
+
+
+			update_model_button.click(function () {
+				$.get(BASE_URL + 'update_model', function (data, status) {
+					if (status == 'success') {
+						console.log(data)
+					}
 				})
-				
-				
 			})
 
-
-			update_model_button.click(function(){
-				$.get(BASE_URL + '/update_model', function(data, status){
-                    if(status == 'success'){
-                        console.log(data)
-                    }
-                })
-			})
-
-			save_data_button.click(function(){
-				$.get(BASE_URL + '/save_data', function(data, status){
-                    if(status == 'success'){
-                        console.log(data)
-                    }
-                })
+			save_data_button.click(function () {
+				$.get(BASE_URL + 'save_data', function (data, status) {
+					if (status == 'success') {
+						console.log(data)
+					}
+				})
 			})
 
 		}
 	</script>
 </head>
+
 <body>
 	<div id="main_controls">
 		<span id="load_example">Load Example</span>
@@ -201,4 +206,5 @@
 	</div>
 
 </body>
+
 </html>

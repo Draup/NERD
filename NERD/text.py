@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import pprint
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 from scipy.stats import entropy
@@ -31,7 +32,8 @@ def get_nth_token(text, n):
 
 
 def cleanup_string(text):
-    toret = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    toret = unicodedata.normalize('NFKD', text).encode(
+        'ascii', 'ignore').decode('ascii')
     toret = toret.strip()
     toret = re.sub('[\r\n\t]+', ' ', toret)
     # toks = re.findall('[\w+\(\),:;\[\]]+', toret)
@@ -123,25 +125,36 @@ class DefaultTextFeaturizer(TransformerMixin):
         data.text = data.text.apply(lambda x: cleanup_string(x))
         data["pos_string"] = data.text.apply(lambda x: get_pos_string(x))
         data['text_feature_text_length'] = data['text'].apply(lambda x: len(x))
-        data['text_feature_capitals'] = data['text'].apply(lambda comment: sum(1 for c in comment if c.isupper()))
-        data['text_feature_digits'] = data['text'].apply(lambda comment: sum(1 for c in comment if c.isdigit()))
+        data['text_feature_capitals'] = data['text'].apply(
+            lambda comment: sum(1 for c in comment if c.isupper()))
+        data['text_feature_digits'] = data['text'].apply(
+            lambda comment: sum(1 for c in comment if c.isdigit()))
         data['text_feature_caps_vs_length'] = data.apply(
             lambda row: row['text_feature_capitals'] / (row['text_feature_text_length'] + 0.001), axis=1)
-        data['text_feature_num_symbols'] = data['text'].apply(lambda comment: len(re.findall('\W', comment)))
-        data['text_feature_num_words'] = data['text'].apply(lambda comment: len(comment.split()))
-        data['text_feature_num_unique_words'] = data['text'].apply(lambda comment: len(set(w for w in comment.split())))
+        data['text_feature_num_symbols'] = data['text'].apply(
+            lambda comment: len(re.findall('\W', comment)))
+        data['text_feature_num_words'] = data['text'].apply(
+            lambda comment: len(comment.split()))
+        data['text_feature_num_unique_words'] = data['text'].apply(
+            lambda comment: len(set(w for w in comment.split())))
         data['text_feature_words_vs_unique'] = data['text_feature_num_unique_words'] / (
-                data['text_feature_num_words'] + 0.001)
+            data['text_feature_num_words'] + 0.001)
 
-        data['text_feature_first_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 0)))
-        data['text_feature_second_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 1)))
-        data['text_feature_third_token'] = data['text'].apply(lambda x: is_alpha_and_numeric(get_nth_token(x, 2)))
+        data['text_feature_first_token'] = data['text'].apply(
+            lambda x: is_alpha_and_numeric(get_nth_token(x, 0)))
+        data['text_feature_second_token'] = data['text'].apply(
+            lambda x: is_alpha_and_numeric(get_nth_token(x, 1)))
+        data['text_feature_third_token'] = data['text'].apply(
+            lambda x: is_alpha_and_numeric(get_nth_token(x, 2)))
 
-        data['text_feature_title_word_count'] = data['text'].apply(lambda x: sum(1 for c in x.split() if c.istitle()))
+        data['text_feature_title_word_count'] = data['text'].apply(
+            lambda x: sum(1 for c in x.split() if c.istitle()))
         data['text_feature_title_word_total_word_ratio'] = data['text_feature_title_word_count'] / (
-                data['text_feature_num_words'] + 0.001)
-        data['text_feature_numeric_tokens'] = data['text'].apply(lambda x: sum(1 for c in x.split() if c.isdigit()))
-        data['text_feature_capital_tokens'] = data['text'].apply(lambda x: sum(1 for c in x.split() if c.isupper()))
+            data['text_feature_num_words'] + 0.001)
+        data['text_feature_numeric_tokens'] = data['text'].apply(
+            lambda x: sum(1 for c in x.split() if c.isdigit()))
+        data['text_feature_capital_tokens'] = data['text'].apply(
+            lambda x: sum(1 for c in x.split() if c.isupper()))
 
         return data.drop(columns=['text'])
 
@@ -176,9 +189,6 @@ class MultiLabelEncoder(TransformerMixin):
         return temp
 
 
-import pprint
-
-
 class BaseTextClassifier:
     """
     A utility class for Text Classification
@@ -197,7 +207,7 @@ class BaseTextClassifier:
         :param unlabelled: DataFrame(['text'])
         :param labelled: DataFrame(['text', 'class'])
         """
-        if type(all_data).__name__ == 'list':
+        if type(all_data) == list:
             self.all_data = pd.DataFrame(data={
                 'text': all_data
             })
@@ -211,7 +221,7 @@ class BaseTextClassifier:
             self.all_data[self.label_col] = np.nan
 
         # extra feature functions
-        if feature_transformer is 'default':
+        if feature_transformer == 'default':
             self.feature_transformer = DefaultTextFeaturizer()
         elif feature_transformer is not None:
             self.feature_transformer = feature_transformer
@@ -222,7 +232,8 @@ class BaseTextClassifier:
 
         self.model = None
         self.display_function = display_function
-        self.data_directory = os.path.join(data_directory, 'Text_Classification_Data')
+        self.data_directory = os.path.join(
+            data_directory, 'Text_Classification_Data')
         os.makedirs(self.data_directory, exist_ok=True)
 
     # def _refresh_text_feature_data(self):
@@ -260,14 +271,16 @@ class BaseTextClassifier:
             'view': self.generate_view(current_example)
         }
         if self.model:
-            preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index+1])
+            preds = self.model.predict(
+                self.all_data.loc[current_example_index: current_example_index+1])
             if self.multilabel:
-                preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
+                preds = list(
+                    self.multilabel_binarizer.inverse_transform(preds)[0])
                 toret['predictions'] = preds
             else:
                 preds = [preds[0]]
                 toret['predictions'] = preds
-        
+
         return toret
 
     def query_new_example(self, mode='entropy'):
@@ -301,9 +314,11 @@ class BaseTextClassifier:
                 'view': self.generate_view(current_example)
             }
             if self.model:
-                preds = self.model.predict(self.all_data.loc[current_example_index: current_example_index+1])
+                preds = self.model.predict(
+                    self.all_data.loc[current_example_index: current_example_index+1])
                 if self.multilabel:
-                    preds = list(self.multilabel_binarizer.inverse_transform(preds)[0])
+                    preds = list(
+                        self.multilabel_binarizer.inverse_transform(preds)[0])
                     toret['predictions'] = preds
                 else:
                     preds = [preds[0]]
@@ -323,7 +338,8 @@ class BaseTextClassifier:
         if self.model is None:
             if self.feature_transformer is None:
                 self.model = Pipeline([
-                    ('vect', make_pipeline(ColumnsSelector(self.text_col), CountVectorizer(ngram_range=(1, 2)))),
+                    ('vect', make_pipeline(ColumnsSelector(self.text_col),
+                     CountVectorizer(ngram_range=(1, 2)))),
                     ('clf', RandomForestClassifier())
                 ])
             else:
@@ -332,15 +348,16 @@ class BaseTextClassifier:
                     ('fu', FeatureUnion([
                         ('text_vectorizer',
                          make_pipeline(ColumnsSelector(self.text_col), CountVectorizer(ngram_range=(1, 2)), ToDense())),
-                        ('text_featurizer', make_pipeline(ColumnsSelector(self.feature_columns), MultiLabelEncoder()))
+                        ('text_featurizer', make_pipeline(ColumnsSelector(
+                            self.feature_columns), MultiLabelEncoder()))
                     ])),
                     ('clf', RandomForestClassifier())
                 ])
 
-
         if self.multilabel:
             self.multilabel_binarizer = MultiLabelBinarizer()
-            labels = self.multilabel_binarizer.fit_transform(lab[self.label_col].apply(lambda x: x.split('; ')))
+            labels = self.multilabel_binarizer.fit_transform(
+                lab[self.label_col].apply(lambda x: x.split('; ')))
         else:
             labels = lab[self.label_col]
 
@@ -363,8 +380,10 @@ class BaseTextClassifier:
         :return:
         """
         if filepath is None:
-            filepath = os.path.join(self.data_directory, 'text_classification_data.csv')
-        self.all_data[[self.text_col, self.label_col]].dropna().to_csv(filepath, index=False)
+            filepath = os.path.join(
+                self.data_directory, 'text_classification_data.csv')
+        self.all_data[[self.text_col, self.label_col]
+                      ].dropna().to_csv(filepath, index=False)
 
     def load_data(self, filepath=None):
         """
@@ -373,7 +392,8 @@ class BaseTextClassifier:
         :return:
         """
         if filepath is None:
-            filepath = os.path.join(self.data_directory, 'text_classification_data.csv')
+            filepath = os.path.join(
+                self.data_directory, 'text_classification_data.csv')
         self.labelled = pd.read_csv(filepath)
         self.all_data = pd.concat([self.all_data, self.labelled])
         self.all_data.reset_index(inplace=True)
@@ -391,7 +411,7 @@ class BaseTextClassifier:
         self._refresh_text_feature_data()
 
 
-def render_app_template(unique_tags_data):
+def render_app_template(unique_tags_data, ui_data):
     """
     Tag data in the form
     [
@@ -439,8 +459,10 @@ def get_app(tagger, tags, ui_data):
     @app.route('/save_example', methods=['POST'])
     def save_example():
         form_data = request.form
+        print(form_data)
+        payload = form_data['payload']
+        form_data = json.loads(payload)
         tag = form_data['tag']
-        tag = json.loads(tag)
         example_index = int(form_data['example_index'])
         tagger.save_example(example_index, tag)
         return 'Success'
