@@ -165,7 +165,64 @@ def get_prediction_uncertainity(pred, mode='max'):
         return max(un)
     elif mode == 'mean':
         return sum(un) / len(un)
+    
+    
+def find_entities_in_text(text, model, utmapping):
+    
+    text = get_pos_tagged_example(text)
+    features = sent2features(text)
+    prediction = model.predict_single(features)
+    lst = zip([t[0] for t in text], prediction)
+    curr_ent = 'O'
+    ent_toks = []
+    entities = []
+    for item in lst:
+        text = item[0]
+        tag = item[1]
+        if tag.startswith('B-'):
+            if len(ent_toks) > 0:
+                entities.append({
+                    'value': ' '.join(ent_toks),
+                    'entity': utmapping[curr_ent],
+                })
+                ent_toks = []
+            curr_ent = tag[2:]
+            ent_toks.append(text)
+        elif tag.startswith('I-'):
+            if curr_ent == 'O':
+                continue
+            ent_toks.append(text)
+        elif tag.startswith('L-'):
+            if curr_ent == 'O':
+                continue
+            ent_toks.append(text)
+            entities.append({
+                'value': ' '.join(ent_toks),
+                'entity': utmapping[curr_ent],
+            })
+            ent_toks = []
+        elif tag.startswith('U-'):
+            curr_ent = tag[2:]
+            ent_toks = []
+            entities.append({
+                'value': text,
+                'entity': utmapping[curr_ent],
+            })
+        elif tag.startswith('O'):
+            if len(ent_toks) > 0:
+                entities.append({
+                    'value': ' '.join(ent_toks),
+                    'entity': utmapping[curr_ent],
+                })
+            ent_toks = []
+            curr_ent = 'O'
 
+    if len(ent_toks) > 0:
+        entities.append({
+            'value': ' '.join(ent_toks),
+            'entity': utmapping[curr_ent],
+        })
+    return entities
 
 class BaseNerTagger:
     """
@@ -592,60 +649,8 @@ class NerTagger:
         self.ntagger.update_model()
 
     def find_entities_in_text(self, text):
-        text = get_pos_tagged_example(text)
-        features = sent2features(text)
-        prediction = self.ntagger.model.predict_single(features)
-        lst = zip([t[0] for t in text], prediction)
-        curr_ent = 'O'
-        ent_toks = []
-        entities = []
-        for item in lst:
-            text = item[0]
-            tag = item[1]
-            if tag.startswith('B-'):
-                if len(ent_toks) > 0:
-                    entities.append({
-                        'value': ' '.join(ent_toks),
-                        'entity': self.utmapping[curr_ent],
-                    })
-                    ent_toks = []
-                curr_ent = tag[2:]
-                ent_toks.append(text)
-            elif tag.startswith('I-'):
-                if curr_ent == 'O':
-                    continue
-                ent_toks.append(text)
-            elif tag.startswith('L-'):
-                if curr_ent == 'O':
-                    continue
-                ent_toks.append(text)
-                entities.append({
-                    'value': ' '.join(ent_toks),
-                    'entity': self.utmapping[curr_ent],
-                })
-                ent_toks = []
-            elif tag.startswith('U-'):
-                curr_ent = tag[2:]
-                ent_toks = []
-                entities.append({
-                    'value': text,
-                    'entity': self.utmapping[curr_ent],
-                })
-            elif tag.startswith('O'):
-                if len(ent_toks) > 0:
-                    entities.append({
-                        'value': ' '.join(ent_toks),
-                        'entity': self.utmapping[curr_ent],
-                    })
-                ent_toks = []
-                curr_ent = 'O'
-
-        if len(ent_toks) > 0:
-            entities.append({
-                'value': ' '.join(ent_toks),
-                'entity': self.utmapping[curr_ent],
-            })
-        return entities
+        return find_entities_in_text(text, self.ntagger.model, self.utmapping)
+    
 
 
 if __name__ == '__main__':
