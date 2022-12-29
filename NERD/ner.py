@@ -20,6 +20,12 @@ from jinja2 import Template
 import pandas as pd
 
 
+def get_sentences(text):
+    sents = text.split('\n')
+    sents = [s.strip() for s in sents if len(s.strip()) > 0]
+    return sents
+
+
 def is_alpha_and_numeric(string):
     toret = ''
     if string.isdigit():
@@ -159,7 +165,64 @@ def get_prediction_uncertainity(pred, mode='max'):
         return max(un)
     elif mode == 'mean':
         return sum(un) / len(un)
+    
+    
+def find_entities_in_text(text, model, utmapping):
+    
+    text = get_pos_tagged_example(text)
+    features = sent2features(text)
+    prediction = model.predict_single(features)
+    lst = zip([t[0] for t in text], prediction)
+    curr_ent = 'O'
+    ent_toks = []
+    entities = []
+    for item in lst:
+        text = item[0]
+        tag = item[1]
+        if tag.startswith('B-'):
+            if len(ent_toks) > 0:
+                entities.append({
+                    'value': ' '.join(ent_toks),
+                    'entity': utmapping[curr_ent],
+                })
+                ent_toks = []
+            curr_ent = tag[2:]
+            ent_toks.append(text)
+        elif tag.startswith('I-'):
+            if curr_ent == 'O':
+                continue
+            ent_toks.append(text)
+        elif tag.startswith('L-'):
+            if curr_ent == 'O':
+                continue
+            ent_toks.append(text)
+            entities.append({
+                'value': ' '.join(ent_toks),
+                'entity': utmapping[curr_ent],
+            })
+            ent_toks = []
+        elif tag.startswith('U-'):
+            curr_ent = tag[2:]
+            ent_toks = []
+            entities.append({
+                'value': text,
+                'entity': utmapping[curr_ent],
+            })
+        elif tag.startswith('O'):
+            if len(ent_toks) > 0:
+                entities.append({
+                    'value': ' '.join(ent_toks),
+                    'entity': utmapping[curr_ent],
+                })
+            ent_toks = []
+            curr_ent = 'O'
 
+    if len(ent_toks) > 0:
+        entities.append({
+            'value': ' '.join(ent_toks),
+            'entity': utmapping[curr_ent],
+        })
+    return entities
 
 class BaseNerTagger:
     """
@@ -277,7 +340,8 @@ class BaseNerTagger:
                 all_possible_transitions=True
             )
 
-        labelled = [item['data'] for item in self.dataset if item['status'] == 'LABELLED']
+        labelled = [item['data']
+                    for item in self.dataset if item['status'] == 'LABELLED']
         X = [item['features'] for item in labelled]
         Y = [sent2labels(item['raw']) for item in labelled]
         self.model.fit(X, Y)
@@ -348,12 +412,12 @@ def get_bilou_tags_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
     toret = []
 
-    tag_items = soup.find_all('span', attrs={'data-tag': True})
+    tag_items = soup.find_all(['span', 'br'], attrs={'data-tag': True})
     #     return tag_items
     tag_ids = [item.attrs['data-tag-id'] for item in tag_items]
     counter = Counter(tag_ids)
 
-    items = soup.find_all('span')
+    items = soup.find_all(['span', 'br'])
     max_items = len(items)
     index = 0
     while index < max_items:
@@ -387,8 +451,12 @@ def generate_html_from_example(ex):
     if type(ex) == type({}):
         ex = ex['raw']
     for item in ex:
-        tag = Tag(name='span')
-        tag.insert(0, item[0])
+        if item[0] == '\n':
+            tag = Tag(name='br', can_be_empty_element=True)
+        else:
+            tag = Tag(name='span')
+            tag.insert(0, item[0])
+
         spans.append(tag)
 
     if len(ex[0]) == 3:
@@ -432,7 +500,7 @@ def render_app_template(unique_tags_data):
         return "Too many tags. Add more colors to list_of_colors"
 
     trainer_path = os.path.join(os.path.dirname(
-        __file__), 'html_templates', 'ner_trainer.html')
+        __file__), 'html_templates', 'ner_trainer.html.j2')
     with open(trainer_path) as templ:
         template = Template(templ.read())
 
@@ -486,7 +554,14 @@ def get_app(ntagger, tags):
 
 
 def get_pos_tagged_example(text):
-    tokens = word_tokenize(text)
+    sents = get_sentences(text)
+    tokens = []
+    for index, sent in enumerate(sents):
+        if index > 0 and index < len(sents) - 1:
+            tokens.append('\n')
+
+        tokens.extend(word_tokenize(sent))
+    # tokens = word_tokenize(text)
     toret = pos_tag(tokens)
     return toret
 
@@ -574,60 +649,8 @@ class NerTagger:
         self.ntagger.update_model()
 
     def find_entities_in_text(self, text):
-        text = get_pos_tagged_example(text)
-        features = sent2features(text)
-        prediction = self.ntagger.model.predict_single(features)
-        lst = zip([t[0] for t in text], prediction)
-        curr_ent = 'O'
-        ent_toks = []
-        entities = []
-        for item in lst:
-            text = item[0]
-            tag = item[1]
-            if tag.startswith('B-'):
-                if len(ent_toks) > 0:
-                    entities.append({
-                        'value': ' '.join(ent_toks),
-                        'entity': self.utmapping[curr_ent],
-                    })
-                    ent_toks = []
-                curr_ent = tag[2:]
-                ent_toks.append(text)
-            elif tag.startswith('I-'):
-                if curr_ent == 'O':
-                    continue
-                ent_toks.append(text)
-            elif tag.startswith('L-'):
-                if curr_ent == 'O':
-                    continue
-                ent_toks.append(text)
-                entities.append({
-                    'value': ' '.join(ent_toks),
-                    'entity': self.utmapping[curr_ent],
-                })
-                ent_toks = []
-            elif tag.startswith('U-'):
-                curr_ent = tag[2:]
-                ent_toks = []
-                entities.append({
-                    'value': text,
-                    'entity': self.utmapping[curr_ent],
-                })
-            elif tag.startswith('O'):
-                if len(ent_toks) > 0:
-                    entities.append({
-                        'value': ' '.join(ent_toks),
-                        'entity': self.utmapping[curr_ent],
-                    })
-                ent_toks = []
-                curr_ent = 'O'
-
-        if len(ent_toks) > 0:
-            entities.append({
-                'value': ' '.join(ent_toks),
-                'entity': self.utmapping[curr_ent],
-            })
-        return entities
+        return find_entities_in_text(text, self.ntagger.model, self.utmapping)
+    
 
 
 if __name__ == '__main__':
